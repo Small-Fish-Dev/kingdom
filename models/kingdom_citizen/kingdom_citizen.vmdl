@@ -84,26 +84,6 @@
 				bone_cull_type = "None"
 			},
 			{
-				_class = "PhysicsJointList"
-				children = 
-				[
-					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_physicsjointlist.vmdl_prefab"
-					},
-				]
-			},
-			{
-				_class = "PhysicsShapeList"
-				children = 
-				[
-					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_physicsshapelist.vmdl_prefab"
-					},
-				]
-			},
-			{
 				_class = "WeightListList"
 				children = 
 				[

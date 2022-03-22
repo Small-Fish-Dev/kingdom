@@ -1,0 +1,13 @@
+{
+  "Title": "Build Your Kingdom",
+  "Type": "game",
+  "Org": "fish",
+  "Ident": "kingdom",
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "ResourcePaths": null,
+  "HasCode": true,
+  "CodePath": "/code/",
+  "RootNamespace": ""
+}

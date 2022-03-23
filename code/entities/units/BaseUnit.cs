@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 partial class BaseUnit : AnimEntity
@@ -18,17 +19,15 @@ partial class BaseUnit : AnimEntity
 	public virtual bool AttackAoE => false;
 	public virtual float AttackRadius => 0f; // Useless if AttackAoE isn't true
 	public virtual string UnitModel => "models/kingdom_citizen/kingdom_citizen.vmdl";
-
-
-	public enum CurrentState
+	public virtual int CurrentState => 0;
+	public virtual Dictionary<int, string> UnitAnimations => new Dictionary<int, string>()
 	{
 
-		Idling,
-		Walking,
-		Attacking,
-		Dying
+		[ 0 ] = "Idle", // Idle
+		[ 1 ] = "Walk_N", // Walk
+		[ 2 ] = "Melee_Punch_Attack_Right", // Attack
 
-	}
+	};
 
 	public override void Spawn()
 	{
@@ -79,6 +78,14 @@ partial class BaseUnit : AnimEntity
 			frameTime = 0f;
 
 		}
+
+	}
+
+	[Event.Tick.Server]
+	public void HandleMovement()
+	{
+
+		Position = Position + Vector3.Forward * 0.2f;
 
 	}
 

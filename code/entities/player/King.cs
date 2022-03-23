@@ -62,11 +62,11 @@ partial class King : Player
 				.Ignore( this )
 				.Run();
 
-			for ( int i = 0; i < 9; i++ )
+			for ( int i = 0; i < 100; i++ )
 			{
 
-				BaseUnit unit = new BaseUnit();
-				unit.Position = tr.EndPosition + new Vector3( ( i % 3 ) * 20f, (int)( i / 3 ) * 20f, 0 );
+				BaseUnit unit = new Peasant();
+				unit.Position = tr.EndPosition + new Vector3( ( i % 10 - 5 ) * 20f, (int)( i / 10 - 5 ) * 20f, 0 );
 
 			}
 

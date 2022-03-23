@@ -6,16 +6,6 @@
 		children = 
 		[
 			{
-				_class = "AnimConstraintList"
-				children = 
-				[
-					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_animconstraintlist.vmdl_prefab"
-					},
-				]
-			},
-			{
 				_class = "ModelModifierList"
 				children = 
 				[
@@ -36,8 +26,24 @@
 				children = 
 				[
 					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_materialgrouplist.vmdl_prefab"
+						_class = "DefaultMaterialGroup"
+						remaps = 
+						[
+							{
+								from = "citizen_eyes.vmat"
+								to = "models/kingdom_citizen/eyes.vmat"
+							},
+							{
+								from = "citizen_skin.vmat"
+								to = "models/kingdom_citizen/citizen.vmat"
+							},
+							{
+								from = "citizen_eyeao.vmat"
+								to = "models/citizen/skin/citizen_eyeao.vmat"
+							},
+						]
+						use_global_default = false
+						global_default_material = ""
 					},
 				]
 			},
@@ -45,10 +51,6 @@
 				_class = "RenderMeshList"
 				children = 
 				[
-					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_rendermeshlist.vmdl_prefab"
-					},
 					{
 						_class = "RenderMeshFile"
 						name = "LOD4"
@@ -66,6 +68,54 @@
 							exception_list = [  ]
 						}
 					},
+					{
+						_class = "RenderMeshFile"
+						name = "Body_LOD0"
+						filename = "models/citizen/citizen.fbx"
+						import_translation = [ 0.0, 0.0, 0.0 ]
+						import_rotation = [ 0.0, 0.0, 0.0 ]
+						import_scale = 1.0
+						align_origin_x_type = "None"
+						align_origin_y_type = "None"
+						align_origin_z_type = "None"
+						parent_bone = ""
+						import_filter = 
+						{
+							exclude_by_default = true
+							exception_list = 
+							[
+								"CitizenTorso_LOD0",
+								"CitizenLegs_LOD0",
+								"CitizenHands_LOD0",
+								"CitizenFeet_LOD0",
+								"CitizenHead_LOD0",
+							]
+						}
+					},
+					{
+						_class = "RenderMeshFile"
+						name = "Body_LOD3"
+						filename = "models/citizen/citizen_lod3.fbx"
+						import_translation = [ 0.0, 0.0, 0.0 ]
+						import_rotation = [ 0.0, 0.0, 0.0 ]
+						import_scale = 1.0
+						align_origin_x_type = "None"
+						align_origin_y_type = "None"
+						align_origin_z_type = "None"
+						parent_bone = ""
+						import_filter = 
+						{
+							exclude_by_default = true
+							exception_list = 
+							[
+								"CitizenTorso_LOD3",
+								"CitizenLegs_LOD3",
+								"CitizenHands_LOD3",
+								"CitizenFeet_LOD3",
+								"CitizenHead_LOD3",
+							]
+						}
+					},
 				]
 			},
 			{
@@ -73,8 +123,296 @@
 				children = 
 				[
 					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_animationlist.vmdl_prefab"
+						_class = "Folder"
+						name = "Movement"
+						children = 
+						[
+							{
+								_class = "Folder"
+								name = "Walk"
+								children = 
+								[
+									{
+										_class = "AnimFile"
+										name = "Walk_N"
+										children = 
+										[
+											{
+												_class = "Prefab"
+												target_file = "models/citizen/prefabs/walk_process.vmdl_prefab"
+											},
+										]
+										activity_name = ""
+										activity_weight = 1
+										weight_list_name = ""
+										fade_in_time = 0.2
+										fade_out_time = 0.2
+										looping = true
+										delta = false
+										worldSpace = false
+										hidden = false
+										anim_markup_ordered = false
+										disable_compression = false
+										source_filename = "models/citizen/animations/Citizen@Walk_N.fbx"
+										start_frame = -1
+										end_frame = -1
+										framerate = -1.0
+										take = 0
+										reverse = false
+									},
+								]
+							},
+							{
+								_class = "Folder"
+								name = "Run"
+								children = 
+								[
+									{
+										_class = "AnimFile"
+										name = "Run_N"
+										children = 
+										[
+											{
+												_class = "Prefab"
+												target_file = "models/citizen/prefabs/run_process.vmdl_prefab"
+											},
+										]
+										activity_name = ""
+										activity_weight = 1
+										weight_list_name = ""
+										fade_in_time = 0.2
+										fade_out_time = 0.2
+										looping = true
+										delta = false
+										worldSpace = false
+										hidden = false
+										anim_markup_ordered = false
+										disable_compression = false
+										source_filename = "models/citizen/animations/Citizen@Run_N.fbx"
+										start_frame = -1
+										end_frame = -1
+										framerate = -1.0
+										take = 0
+										reverse = false
+									},
+								]
+							},
+						]
+					},
+					{
+						_class = "Folder"
+						name = "Weapons"
+						children = 
+						[
+							{
+								_class = "Folder"
+								name = "HoldItem"
+								children = 
+								[
+									{
+										_class = "Folder"
+										name = "HoldItem_RH"
+										children = 
+										[
+											{
+												_class = "AnimFile"
+												name = "HoldItem_RH_Pose_Standing_01"
+												activity_name = ""
+												activity_weight = 1
+												weight_list_name = ""
+												fade_in_time = 0.2
+												fade_out_time = 0.2
+												looping = false
+												delta = false
+												worldSpace = false
+												hidden = false
+												anim_markup_ordered = false
+												disable_compression = false
+												source_filename = "models/citizen/animations/weapons/Citizen@HoldItem_RH_Pose_Standing_01.fbx"
+												start_frame = -1
+												end_frame = -1
+												framerate = -1.0
+												take = 0
+												reverse = false
+											},
+											{
+												_class = "AnimFile"
+												name = "HoldItem_RH_Throw_Normal"
+												activity_name = ""
+												activity_weight = 1
+												weight_list_name = ""
+												fade_in_time = 0.2
+												fade_out_time = 0.2
+												looping = false
+												delta = false
+												worldSpace = false
+												hidden = false
+												anim_markup_ordered = false
+												disable_compression = false
+												source_filename = "models/citizen/animations/weapons/Citizen@HoldItem_RH_Throw_Normal.fbx"
+												start_frame = -1
+												end_frame = -1
+												framerate = -1.0
+												take = 0
+												reverse = false
+											},
+											{
+												_class = "AnimFile"
+												name = "HoldItem_RH_Throw_Strong"
+												activity_name = ""
+												activity_weight = 1
+												weight_list_name = ""
+												fade_in_time = 0.2
+												fade_out_time = 0.2
+												looping = false
+												delta = false
+												worldSpace = false
+												hidden = false
+												anim_markup_ordered = false
+												disable_compression = false
+												source_filename = "models/citizen/animations/weapons/Citizen@HoldItem_RH_Throw_Strong.fbx"
+												start_frame = -1
+												end_frame = -1
+												framerate = -1.0
+												take = 0
+												reverse = false
+											},
+										]
+									},
+								]
+							},
+							{
+								_class = "Folder"
+								name = "Melee"
+								children = 
+								[
+									{
+										_class = "AnimFile"
+										name = "Melee_Punch_Idle_Standing_01"
+										note = "This animation is extracted from a 8 second motion capture take that was cleaned up in the SFM and exported from there. Here in ModelDoc, it\'s trimmed down to a specific frame range, and AnimSmoothLoop then cleans up the looping point."
+										children = 
+										[
+											{
+												_class = "AnimSmoothLoop"
+												frames_from_start = 10
+												frames_from_end = 10
+											},
+										]
+										activity_name = ""
+										activity_weight = 1
+										weight_list_name = ""
+										fade_in_time = 0.2
+										fade_out_time = 0.2
+										looping = true
+										delta = false
+										worldSpace = false
+										hidden = false
+										anim_markup_ordered = false
+										disable_compression = false
+										source_filename = "models/citizen/animations/weapons/Citizen@Melee_Punch_Idle_Standing.dmx"
+										start_frame = -1
+										end_frame = 86
+										framerate = -1.0
+										take = 0
+										reverse = false
+									},
+									{
+										_class = "AnimFile"
+										name = "Melee_Punch_Idle_Rare"
+										note = "This animation is extracted from a 8 second motion capture take that was cleaned up in the SFM and exported from there. Here in ModelDoc, it\'s trimmed down to a specific frame range."
+										children = 
+										[
+											{
+												_class = "AnimSmoothLoop"
+												disabled = true
+												frames_from_start = 5
+												frames_from_end = 5
+											},
+										]
+										activity_name = ""
+										activity_weight = 1
+										weight_list_name = ""
+										fade_in_time = 0.2
+										fade_out_time = 0.2
+										looping = true
+										delta = false
+										worldSpace = false
+										hidden = false
+										anim_markup_ordered = false
+										disable_compression = false
+										source_filename = "models/citizen/animations/weapons/Citizen@Melee_Punch_Idle_Standing.dmx"
+										start_frame = 98
+										end_frame = 133
+										framerate = 35.0
+										take = 0
+										reverse = false
+									},
+									{
+										_class = "AnimFile"
+										name = "Melee_Punch_Attack_Left"
+										activity_name = ""
+										activity_weight = 1
+										weight_list_name = ""
+										fade_in_time = 0.2
+										fade_out_time = 0.2
+										looping = false
+										delta = false
+										worldSpace = false
+										hidden = false
+										anim_markup_ordered = false
+										disable_compression = false
+										source_filename = "models/citizen/animations/weapons/Citizen@Melee_Punch_Attack_Left.fbx"
+										start_frame = -1
+										end_frame = -1
+										framerate = 36.0
+										take = 0
+										reverse = false
+									},
+									{
+										_class = "AnimFile"
+										name = "Melee_Punch_Attack_Right"
+										activity_name = ""
+										activity_weight = 1
+										weight_list_name = ""
+										fade_in_time = 0.2
+										fade_out_time = 0.2
+										looping = false
+										delta = false
+										worldSpace = false
+										hidden = false
+										anim_markup_ordered = false
+										disable_compression = false
+										source_filename = "models/citizen/animations/weapons/Citizen@Melee_Punch_Attack_Right.fbx"
+										start_frame = -1
+										end_frame = -1
+										framerate = 32.0
+										take = 0
+										reverse = false
+									},
+								]
+							},
+						]
+					},
+					{
+						_class = "AnimFile"
+						name = "IdleLayer_01"
+						activity_name = ""
+						activity_weight = 1
+						weight_list_name = ""
+						fade_in_time = 0.2
+						fade_out_time = 0.2
+						looping = true
+						delta = false
+						worldSpace = false
+						hidden = false
+						anim_markup_ordered = false
+						disable_compression = false
+						source_filename = "models/citizen/animations/Citizen@IdleLayer_01.fbx"
+						start_frame = -1
+						end_frame = -1
+						framerate = -1.0
+						take = 0
+						reverse = false
 					},
 				]
 				default_root_bone_name = "pelvis"
@@ -88,8 +426,38 @@
 				children = 
 				[
 					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_weightlistlist.vmdl_prefab"
+						_class = "WeightList"
+						name = "Blend_UpperBody"
+						default_weight = 0.0
+						weights = 
+						[
+							{
+								bone = "clavicle_L"
+								weight = 1.0
+							},
+							{
+								bone = "clavicle_R"
+								weight = 1.0
+							},
+							{
+								bone = "neck_0"
+								weight = 1.0
+							},
+							{
+								bone = "spine_0"
+								weight = 0.315493
+							},
+							{
+								bone = "spine_1"
+								weight = 0.532394
+							},
+							{
+								bone = "spine_2"
+								weight = 0.743662
+							},
+						]
+						master_morph_weight = -1.0
+						morph_weights = [  ]
 					},
 				]
 			},
@@ -115,8 +483,30 @@
 				children = 
 				[
 					{
-						_class = "Prefab"
-						target_file = "models/citizen/prefabs/citizen_lodgrouplist.vmdl_prefab"
+						_class = "LODGroup"
+						switch_threshold = 0.0
+						meshes = 
+						[
+							"Body_LOD0",
+						]
+					},
+					{
+						_class = "LODGroup"
+						note = "TODO: experiment with culling bones here right in the sources. Unlike in S1 it seems like we don\'t have LOD commands specifically related to culling bones"
+						switch_threshold = 10.0
+						meshes = 
+						[
+							"Body_LOD3",
+						]
+					},
+					{
+						_class = "LODGroup"
+						note = "TODO: experiment with culling bones here right in the sources. Unlike in S1 it seems like we don\'t have LOD commands specifically related to culling bones"
+						switch_threshold = 20.0
+						meshes = 
+						[
+							"LOD4",
+						]
 					},
 				]
 			},

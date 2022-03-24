@@ -138,8 +138,15 @@
 										children = 
 										[
 											{
-												_class = "Prefab"
-												target_file = "models/citizen/prefabs/walk_process.vmdl_prefab"
+												_class = "ExtractMotion"
+												extract_tx = true
+												extract_ty = true
+												extract_tz = false
+												extract_rz = false
+												linear = false
+												quadratic = false
+												root_bone_name = "pelvis"
+												motion_type = "Single"
 											},
 										]
 										activity_name = ""
@@ -173,8 +180,15 @@
 										children = 
 										[
 											{
-												_class = "Prefab"
-												target_file = "models/citizen/prefabs/run_process.vmdl_prefab"
+												_class = "ExtractMotion"
+												extract_tx = true
+												extract_ty = true
+												extract_tz = false
+												extract_rz = false
+												linear = false
+												quadratic = false
+												root_bone_name = "pelvis"
+												motion_type = "Single"
 											},
 										]
 										activity_name = ""
@@ -222,7 +236,7 @@
 												weight_list_name = ""
 												fade_in_time = 0.2
 												fade_out_time = 0.2
-												looping = false
+												looping = true
 												delta = false
 												worldSpace = false
 												hidden = false
@@ -243,7 +257,7 @@
 												weight_list_name = ""
 												fade_in_time = 0.2
 												fade_out_time = 0.2
-												looping = false
+												looping = true
 												delta = false
 												worldSpace = false
 												hidden = false
@@ -264,7 +278,7 @@
 												weight_list_name = ""
 												fade_in_time = 0.2
 												fade_out_time = 0.2
-												looping = false
+												looping = true
 												delta = false
 												worldSpace = false
 												hidden = false
@@ -355,7 +369,7 @@
 										weight_list_name = ""
 										fade_in_time = 0.2
 										fade_out_time = 0.2
-										looping = false
+										looping = true
 										delta = false
 										worldSpace = false
 										hidden = false
@@ -376,7 +390,7 @@
 										weight_list_name = ""
 										fade_in_time = 0.2
 										fade_out_time = 0.2
-										looping = false
+										looping = true
 										delta = false
 										worldSpace = false
 										hidden = false

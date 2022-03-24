@@ -3,31 +3,45 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-partial class BaseUnit : AnimEntity
+public enum UnitState
 {
 
+	Idle,
+	Walk,
+	Attack
+
+}
+
+partial class BaseUnit : AnimEntity
+{
 
 	public virtual string UnitName => "Base";
 	public virtual string UnitType => "Base";
 	public virtual int HitPoints => 1;
 	public virtual float ModelScale => 0.3f;
-	// TODO Add animation stuff
-	public virtual float UnitRadius => 7f;
-	public virtual int AttackStrength => 1;
+	public virtual int UnitWidth => 1; // How many lanes are taken up
+	public virtual int AttackStrength => 1; // How many hitpoints they deal
 	public virtual float AttackSpeed => 2f; // Seconds
-	public virtual float AttackRange => 15f;
-	public virtual bool AttackAoE => false;
+	public virtual float AttackRange => 15f; // How far they can reach
+	public virtual bool AttackAoE => false; // Area attacks
 	public virtual float AttackRadius => 0f; // Useless if AttackAoE isn't true
 	public virtual string UnitModel => "models/kingdom_citizen/kingdom_citizen.vmdl";
-	public virtual int CurrentState => 0;
-	public virtual Dictionary<int, string> UnitAnimations => new Dictionary<int, string>()
+
+	public virtual float AnimationFrames => 1f / 30f;        // Full animation frames  ( 1 / { fps } )
+	public virtual float MinimumFrames => 1 / 0.5f;            // Frames at max distance ( 1 / { fps } )
+	public virtual float StartingDistance => 200f;    // Minimum distance before the frames start to drop
+	public virtual float EndingDistance => 1500f;   // Distance at which the frames reach {minFps}
+
+	public virtual Dictionary<UnitState, string> UnitAnimations => new Dictionary<UnitState, string>()
 	{
 
-		[ 0 ] = "Idle", // Idle
-		[ 1 ] = "Walk_N", // Walk
-		[ 2 ] = "Melee_Punch_Attack_Right", // Attack
+		[ UnitState.Idle ] = "Melee_Punch_Idle_Standing_01", // Idle
+		[ UnitState.Walk ] = "Walk_N", // Walk
+		[ UnitState.Attack ] = "Melee_Punch_Attack_Right", // Attack
 
 	};
+
+	public UnitState State = UnitState.Walk;
 
 	public override void Spawn()
 	{
@@ -62,18 +76,14 @@ partial class BaseUnit : AnimEntity
 	public void HandleAnimations()
 	{
 
-		CurrentSequence.Name = "Walk_N";
-		float frameDelta = 1f / 30f;		// Full animation frames  ( 1 / { fps } )
-		float minFps = 1 / 0.5f;			// Frames at max distance ( 1 / { fps } )
-		float minDistanceFalloff = 200f;	// Minimum distance before the frames start to drop
-		float maxDistanceFalloff = 1500f;	// Distance at which the frames reach {minFps}
-
 		if ( frameTime >= nextFrame )
 		{
 
+			CurrentSequence.Name = UnitAnimations[ State ];
+
 			CurrentSequence.Time = ( CurrentSequence.Time + frameTime ) % CurrentSequence.Duration;
-			lastDistance = Math.Max( CurrentView.Position.Distance( Position ) - minDistanceFalloff, 1f );
-			nextFrame = MathX.LerpTo( frameDelta, minFps, lastDistance / maxDistanceFalloff );
+			lastDistance = Math.Max( CurrentView.Position.Distance( Position ) - StartingDistance, 1f );
+			nextFrame = MathX.LerpTo( AnimationFrames, MinimumFrames, lastDistance / EndingDistance );
 
 			frameTime = 0f;
 
@@ -85,7 +95,12 @@ partial class BaseUnit : AnimEntity
 	public void HandleMovement()
 	{
 
-		Position = Position + Vector3.Forward * 0.2f;
+		if ( State == UnitState.Walk )
+		{
+
+			Position = Position + Vector3.Forward * 0.4f;
+
+		}
 
 	}
 

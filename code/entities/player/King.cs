@@ -62,13 +62,17 @@ public partial class King : Player
 				.Ignore( this )
 				.Run();
 
-			for ( int i = 0; i < 100; i++ )
+			/*for ( int i = 0; i < 100; i++ )
 			{
 
 				var unit = new Peasant();
 				unit.Position = tr.EndPosition + new Vector3( ( i % 10 - 5 ) * 15f, (int)( i / 10 - 5 ) * 15f, 0 );
 
-			}
+			}*/
+
+			var fort = new BaseFort();
+			fort.Position = tr.EndPosition;
+			Kingdom.Forts.Add( fort );
 
 		}
 

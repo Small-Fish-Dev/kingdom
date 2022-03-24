@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-partial class King : Player
+public partial class King : Player
 {
 
 	public Clothing.Container Clothing = new();
@@ -65,8 +65,8 @@ partial class King : Player
 			for ( int i = 0; i < 100; i++ )
 			{
 
-				BaseUnit unit = new Peasant();
-				unit.Position = tr.EndPosition + new Vector3( ( i % 10 - 5 ) * 20f, (int)( i / 10 - 5 ) * 20f, 0 );
+				var unit = new Peasant();
+				unit.Position = tr.EndPosition + new Vector3( ( i % 10 - 5 ) * 15f, (int)( i / 10 - 5 ) * 15f, 0 );
 
 			}
 

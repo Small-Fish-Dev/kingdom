@@ -12,11 +12,11 @@ public enum UnitState
 
 }
 
-partial class BaseUnit : AnimEntity
+public partial class BaseUnit : AnimEntity
 {
 
 	public virtual string UnitName => "Base";
-	public virtual string UnitType => "Base";
+	public virtual string UnitAlignment => "Base";
 	public virtual int HitPoints => 1;
 	public virtual float ModelScale => 0.3f;
 	public virtual int UnitWidth => 1; // How many lanes are taken up
@@ -41,7 +41,10 @@ partial class BaseUnit : AnimEntity
 
 	};
 
-	public UnitState State = UnitState.Walk;
+	public virtual float AttackKeyframe => 0.2f; // At which point of the attack animation damage is dealt ( Seconds )
+
+
+	public virtual UnitState State => UnitState.Idle;
 
 	public override void Spawn()
 	{
@@ -50,7 +53,7 @@ partial class BaseUnit : AnimEntity
 
 		SetModel( UnitModel );
 
-		Tags.Add( "Unit", $"{UnitName}", $"{UnitType}" );
+		Tags.Add( "Unit", $"{UnitName}", $"{UnitAlignment}" );
 
 		EnableDrawing = true;
 		EnableShadowCasting = false;
@@ -71,6 +74,7 @@ partial class BaseUnit : AnimEntity
 	TimeSince frameTime = 0f;
 	float lastDistance = 0f;
 	float nextFrame = 0f;
+	bool hasAttacked = false;
 
 	[Event.Tick.Client]
 	public void HandleAnimations()
@@ -84,6 +88,25 @@ partial class BaseUnit : AnimEntity
 			CurrentSequence.Time = ( CurrentSequence.Time + frameTime ) % CurrentSequence.Duration;
 			lastDistance = Math.Max( CurrentView.Position.Distance( Position ) - StartingDistance, 1f );
 			nextFrame = MathX.LerpTo( AnimationFrames, MinimumFrames, lastDistance / EndingDistance );
+
+			if ( CurrentSequence.Time >= AttackKeyframe )
+			{
+				
+				if ( hasAttacked == false )
+				{
+
+					DebugOverlay.Sphere( Position + Rotation.Forward * 5f, 5f, Color.Red, true, 0.3f );
+					hasAttacked = true;
+
+				}
+
+			}
+			else
+			{
+
+				hasAttacked = false;
+
+			}
 
 			frameTime = 0f;
 

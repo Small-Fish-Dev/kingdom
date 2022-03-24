@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-partial class Peasant : BaseUnit
+public partial class Peasant : BaseUnit
 {
 
 	public override string UnitName => "Grunt";
-	public override string UnitType => "Human";
+	public override string UnitAlignment => "Humans";
 
 
 }

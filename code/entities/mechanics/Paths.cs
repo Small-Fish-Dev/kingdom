@@ -20,7 +20,7 @@ public class Lane
 		Waypoints.Add( from );
 
 		Vector3 direction = ( to - from ).Normal;
-		float waypointDistance = totalDistance / ( totalWaypoints - 1 ); // Last waypoint is "to"
+		float waypointDistance = totalDistance / ( totalWaypoints );
 		
 		for ( int i = 0; i < totalWaypoints; i++ )
 		{
@@ -94,27 +94,35 @@ public partial class Kingdom
 
 	public static List<BaseFort> Forts = new List<BaseFort>();
 
-	[ServerCmd("generate_paths")]
-	public static void GeneratePaths()
+	[ServerCmd( "generate_paths" )]
+	public static void GeneratePaths( float maxDistance = 500f )
 	{
 
-		new Path( Kingdom.Forts[0], Kingdom.Forts[1], 5, 15f, 20f )
-			.GenerateLanes();
+		foreach ( BaseFort fortFrom in Kingdom.Forts )
+		{
 
-		new Path( Kingdom.Forts[0], Kingdom.Forts[2], 5, 15f, 20f )
-			.GenerateLanes();
+			foreach ( BaseFort fortTo in Kingdom.Forts )
+			{
 
-		new Path( Kingdom.Forts[0], Kingdom.Forts[3], 5, 15f, 20f )
-			.GenerateLanes();
+				if ( fortFrom != fortTo && !fortFrom.AvailablePaths.ContainsKey( fortTo ) )
+				{
 
-		new Path( Kingdom.Forts[1], Kingdom.Forts[2], 5, 15f, 20f )
-			.GenerateLanes();
+					if ( fortFrom.Position.Distance( fortTo.Position ) <= maxDistance )
+					{
 
-		new Path( Kingdom.Forts[1], Kingdom.Forts[3], 5, 15f, 20f )
-			.GenerateLanes();
+						var path = new Path( fortFrom, fortTo, 5, 15f, 15f );
+						path.GenerateLanes();
 
-		new Path( Kingdom.Forts[2], Kingdom.Forts[3], 5, 15f, 20f )
-			.GenerateLanes();
+						fortFrom.AvailablePaths[ fortTo ] = path;
+						fortTo.AvailablePaths[ fortFrom ] = path;
+
+					}
+
+				}
+
+			}
+
+		}
 
 	}
 	

@@ -6,6 +6,7 @@ public partial class King : Player
 {
 
 	public Clothing.Container Clothing = new();
+	[Net] public int Gold { get; set; } = 0;
 
 	public King() { }
 	public King( Client cl )

@@ -7,37 +7,64 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
+public enum WaypointStatus
+{
+
+	Free,
+	Taken,
+	Freeing
+
+}
+
+public class Waypoint
+{
+
+	public Vector3 Position;
+	public WaypointStatus Status = WaypointStatus.Free;
+
+	public Waypoint( Vector3 position )
+	{
+
+		Position = position;
+
+	}
+
+}
+
 public class Lane
 {
 
 	// Ideally it will never have anything above it or drops below, because that will screw this up
 
-	public List<Vector3> Waypoints = new List<Vector3>();
+	public List<Waypoint> Waypoints = new List<Waypoint>();
 
-	public Lane( Vector3 from, Vector3 to, float totalWaypoints, float totalDistance )
+	public Lane( Vector3 from, Vector3 to, Vector3 offset, float totalWaypoints, float totalDistance )
 	{
 
-		Waypoints.Add( from );
+		Waypoints.Add( new Waypoint( from ) ); // First waypoints are inside the fort and then spread out
 
 		Vector3 direction = ( to - from ).Normal;
 		float waypointDistance = totalDistance / ( totalWaypoints );
 		
-		for ( int i = 0; i < totalWaypoints; i++ )
+		for ( int i = 0; i < totalWaypoints - 1; i++ )
 		{
 
-			Vector3 rayPosition = Waypoints[i] + direction * waypointDistance;
+			Vector3 rayPosition = Waypoints[i].Position + direction * waypointDistance + ( i == 0 ? offset : Vector3.Zero );
 
 			TraceResult ray = Trace.Ray( rayPosition + Vector3.Up * 100f, rayPosition + Vector3.Down * 100f )
 				.WorldOnly()
 				.Run();
 
-			Waypoints.Add( ray.EndPosition );
+			Waypoints.Add( new Waypoint( ray.EndPosition ) );
 
-			DebugOverlay.Sphere( ray.EndPosition, 5f, Color.Red, true, 5f );
+			DebugOverlay.Sphere( ray.EndPosition, 5f, Color.Red, false, 15f );
 
 		}
 
-		Waypoints.Add( to );
+		Waypoints.Add( new Waypoint( to ) ); // Last waypoints are inside the fort
+
+		DebugOverlay.Sphere( from, 8f, Color.Red, false, 15f );
+		DebugOverlay.Sphere( to, 8f, Color.Red, false, 15f );
 
 	}
 
@@ -67,19 +94,19 @@ public class Path
 	public void GenerateLanes()
 	{
 
-		Vector3 startingPos = FortFrom.Position;
-		Vector3 endingPos = FortTo.Position;
+		Vector3 forwardDirection = (FortTo.Position - FortFrom.Position).Normal;
+		Vector3 rightDirection = Vector3.Cross( forwardDirection, Vector3.Up );
+		Vector3 startingPos = FortFrom.Position + forwardDirection * FortFrom.EntranceDistance;
+		Vector3 endingPos = FortTo.Position - forwardDirection * FortTo.EntranceDistance;
 		float distance = startingPos.Distance( endingPos );
 		int totalWaypoints = (int)(distance / LaneDensity);
-		Vector3 forwardDirection = (endingPos - startingPos).Normal;
-		Vector3 rightDirection = Vector3.Cross( forwardDirection, Vector3.Up );
 
 		for ( int i = 0; i < TotalLanes; i++ )
 		{
 
 			Vector3 offset = ( rightDirection * i - ( rightDirection * ( TotalLanes / 2 ) ) ) * LaneWidth;
 
-			Lane resultLane = new Lane( startingPos + offset, endingPos + offset, totalWaypoints, distance );
+			Lane resultLane = new Lane( startingPos, endingPos, offset, totalWaypoints, distance );
 
 			Lanes.Add( resultLane );
 

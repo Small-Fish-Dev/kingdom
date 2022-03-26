@@ -114,7 +114,7 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
-	[Event.Tick.Server]
+	[Event.Tick]
 	public void HandleMovement()
 	{
 

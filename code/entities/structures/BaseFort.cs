@@ -18,19 +18,17 @@ public partial class BaseFort : BaseStructure
 
 	public override StructureType Type => StructureType.Outpost;
 
-	public Client Holder; // Who's holding the fort
-	public Dictionary<Type, int> StoredUnits = new Dictionary<Type, int>();
-	public Dictionary<BaseFort, Path> AvailablePaths = new Dictionary<BaseFort, Path>();
+	[Net] public Client Holder { get; set; } = null; // Who's holding the fort
+	[Net] public Dictionary<Type, int> StoredUnits { get; set; } = new Dictionary<Type, int>();
+	[Net] public Dictionary<BaseFort, Path> AvailablePaths { get; set; } = new Dictionary<BaseFort, Path>();
 
-	public override void Spawn()
+	public BaseFort()
 	{
-
-		base.Spawn();
 
 		if ( StartingUnits > 0 )
 		{
 
-			
+			AddUnits( UnitsType, StartingUnits );
 
 		}
 
@@ -56,18 +54,17 @@ public partial class BaseFort : BaseStructure
 
 	}
 
-	int gold = 0;//TODO: Remove this
 	TimeSince lastUnitGenerated = 0;
 	TimeSince lastGoldGenerated = 0;
 
 	[Event.Tick]
-	public void GenerateUnits()
+	public void GenerateTimers()
 	{
 
-		if ( true )//Holder.IsValid() )
+		if ( Holder.IsValid() )
 		{
 
-			if ( lastUnitGenerated >= 1/UnitsPerSecond )
+			if ( lastUnitGenerated >= 1 / UnitsPerSecond )
 			{
 
 				AddUnits( UnitsType, 1 );
@@ -78,16 +75,71 @@ public partial class BaseFort : BaseStructure
 			if ( lastGoldGenerated >= 1 / GoldPerSecond )
 			{
 
-				//( Holder.Pawn as King ).Gold++;
-				gold++; //TODO: Remove this
+				( Holder.Pawn as King ).Gold++;
 				lastGoldGenerated = 0;
 
 			}
 
 		}
 
-		DebugOverlay.Text( Position + Vector3.Up * 100f, $"Gold: {gold}" );
-		DebugOverlay.Text( Position + Vector3.Up * 80f, $"Units: Peasant: {StoredUnits[typeof(Peasant)]}" );
+		DebugOverlay.Text( Position + Vector3.Up * 100f, $"Holder: {Holder?.Name}" );
+
+		int count = 0;
+		foreach ( var unit in StoredUnits )
+		{
+
+			DebugOverlay.Text( Position + Vector3.Up * 80f - count * 10f, $"{unit.Key.Name}: {unit.Value}" );
+			count++;
+
+		}
+
+	}
+
+	[Event("Kingdom_Next_Turn")]
+	public void HandleTurns()
+	{
+
+		if ( IsClient ) { return; }
+
+		if ( Holder != null && Holder.IsValid() )
+		{
+
+			foreach ( var path in AvailablePaths )
+			{
+
+				foreach ( var lane in path.Value.Lanes )
+				{
+
+					foreach ( var unit in StoredUnits )
+					{
+
+						if ( unit.Value > 0 )
+						{
+
+							CreateUnit( unit.Key, this, path.Value, path.Value.Lanes.IndexOf( lane ) );
+							StoredUnits[unit.Key]--;
+
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
+	public void CreateUnit( Type unitType, BaseFort originalFort, Path originalPath, int laneID )
+	{
+
+		if ( unitType.IsSubclassOf( typeof( BaseUnit ) ) )
+		{
+
+			Library.Create<BaseUnit>( unitType ).SetupUnit( originalFort, originalPath, laneID );
+
+		}
 
 	}
 

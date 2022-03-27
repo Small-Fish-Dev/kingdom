@@ -21,13 +21,20 @@ public partial class BaseUnit : AnimEntity
 	public virtual float ModelScale => 0.3f;
 	public virtual int UnitWidth => 1; // How many lanes are taken up
 	public virtual int AttackStrength => 1; // How many hitpoints they deal
-	public virtual float AttackSpeed => 2f; // Seconds
-	public virtual float AttackRange => 15f; // How far they can reach
+	public virtual int AttackSpeed => 1; // How many turns to attack
+	public virtual int AttackRange => 1; // How far they can reach ( In waypoints )
 	public virtual bool AttackAoE => false; // Area attacks
-	public virtual float AttackRadius => 0f; // Useless if AttackAoE isn't true
+	public virtual int AttackRadius => 0; // Useless if AttackAoE isn't true, 1 is the spot in front
+	/*	      2 is 4 spots	          3 is 9 spots           4 is 16 spots
+	 *	 	[ ][ ][ ][ ][ ]			[ ][ ][ ][ ][ ]			[ ][ ][ ][ ][ ]
+	 *		[ ][ ][ ][ ][ ]			[ ][ ][ ][ ][ ]			[ ][X][X][X][ ]
+	 *		[ ][ ][ ][ ][ ]			[ ][ ][X][ ][ ]			[ ][X][X][X][ ]
+	 *		[ ][ ][X][ ][ ]			[ ][X][X][X][ ]			[X][X][X][X][X]
+	 *		[ ][X][X][X][ ]			[X][X][X][X][X]			[X][X][X][X][X]
+	 */
 	public virtual string UnitModel => "models/kingdom_citizen/kingdom_citizen.vmdl";
 
-	public virtual float AnimationFrames => 1f / 30f;        // Full animation frames  ( 1 / { fps } )
+	public virtual float AnimationFrames => 1f / 24f;        // Full animation frames  ( 1 / { fps } )
 	public virtual float MinimumFrames => 1 / 0.5f;            // Frames at max distance ( 1 / { fps } )
 	public virtual float StartingDistance => 200f;    // Minimum distance before the frames start to drop
 	public virtual float EndingDistance => 1500f;   // Distance at which the frames reach {minFps}
@@ -35,7 +42,7 @@ public partial class BaseUnit : AnimEntity
 	public virtual Dictionary<UnitState, string> UnitAnimations => new Dictionary<UnitState, string>()
 	{
 
-		[ UnitState.Idle ] = "Melee_Punch_Idle_Standing_01", // Idle
+		[ UnitState.Idle ] = "IdleLayer_01", // Idle
 		[ UnitState.Walk ] = "Walk_N", // Walk
 		[ UnitState.Attack ] = "Melee_Punch_Attack_Right", // Attack
 
@@ -44,7 +51,31 @@ public partial class BaseUnit : AnimEntity
 	public virtual float AttackKeyframe => 0.2f; // At which point of the attack animation damage is dealt ( Seconds )
 
 
-	public virtual UnitState State => UnitState.Idle;
+	[Net] public UnitState State { get; set; } = UnitState.Idle;
+	[Net] public Waypoint OldWaypoint { get; set; }
+	[Net] public int CurrentWaypointID { get; set; } = 0;
+	[Net] public Lane CurrentLane { get; set; }
+	[Net] public int CurrentLaneID { get; set; } = 0;
+	[Net] public Waypoint CurrentWaypoint { get; set; }
+	[Net] public Client Commander { get; set; }
+	[Net] public BaseFort OriginalFort { get; set; }
+	[Net] public Path OriginalPath { get; set; }
+	public bool IsBackwards { get; set; }
+
+	public void SetupUnit( BaseFort originalFort, Path originalPath, int laneID )
+	{
+
+		OriginalFort = originalFort;
+		CurrentLaneID = laneID;
+		OriginalPath = originalPath;
+		CurrentLane = OriginalPath.Lanes[CurrentLaneID];
+		Commander = OriginalFort.Holder;
+		IsBackwards = CurrentLane.OriginPath.FortFrom == OriginalFort;
+		CurrentWaypointID = IsBackwards ? 0 : CurrentLane.Waypoints.Count - 1;
+		CurrentWaypoint = CurrentLane.Waypoints[ CurrentWaypointID ];
+		OldWaypoint = CurrentWaypoint;
+
+	}
 
 	public override void Spawn()
 	{
@@ -52,6 +83,8 @@ public partial class BaseUnit : AnimEntity
 		base.Spawn();
 
 		SetModel( UnitModel );
+
+		Rotation = Rotation.LookAt( IsBackwards ? CurrentLane.OriginPath.FortFrom.Position - CurrentLane.OriginPath.FortTo.Position : CurrentLane.OriginPath.FortTo.Position - CurrentLane.OriginPath.FortFrom.Position );
 
 		Tags.Add( "Unit", $"{UnitName}", $"{UnitAlignment}" );
 
@@ -68,6 +101,101 @@ public partial class BaseUnit : AnimEntity
 
 		base.ClientSpawn();
 
+	}
+
+	public bool CanMoveTo( Waypoint destination )
+	{
+
+		if ( destination.Status != WaypointStatus.Taken )
+		{
+
+			return true;
+
+		}
+
+		return false;
+
+	}
+
+	public void MoveTo( Waypoint destination )
+	{
+
+		if ( CanMoveTo( destination ) )
+		{
+
+			CurrentWaypoint.Status = WaypointStatus.Free;
+			destination.Status = WaypointStatus.Taken;
+
+			OldWaypoint = CurrentWaypoint;
+			CurrentWaypoint = destination;
+
+			State = UnitState.Walk;
+
+		}
+
+	}
+
+	[Event("Kingdom_Next_Turn")]
+	public void HandleTurnsMovement()
+	{
+
+		// Don't walk if it's attacking
+		if ( State == UnitState.Attack ) { return; }
+
+		int moveDirection = IsBackwards ? -1 : 1;
+
+		// Try moving forward
+		var targetWaypoint = CurrentLane.Waypoints[CurrentWaypointID + moveDirection];
+
+		if ( CanMoveTo( targetWaypoint ) )
+		{
+
+			MoveTo( targetWaypoint );
+			return;
+
+		}
+
+		// Try moving right
+		if ( OriginalPath.Lanes[CurrentLaneID + 1] != null )
+		{
+
+			targetWaypoint = OriginalPath.Lanes[CurrentLaneID + 1].Waypoints[CurrentWaypointID + moveDirection];
+
+			if ( CanMoveTo( targetWaypoint ) )
+			{
+
+				MoveTo( targetWaypoint );
+				return;
+
+			}
+
+		}
+
+		// Try moving left
+		if ( OriginalPath.Lanes[CurrentLaneID - 1] != null )
+		{
+
+			targetWaypoint = OriginalPath.Lanes[CurrentLaneID - 1].Waypoints[CurrentWaypointID + moveDirection];
+
+			if ( CanMoveTo( targetWaypoint ) )
+			{
+
+				MoveTo( targetWaypoint );
+				return;
+
+			}
+
+		}
+
+		State = UnitState.Idle;
+
+	}
+
+	[Event.Tick]
+	public void HandleMovement()
+	{
+
+		Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, 10f * Time.Delta / Kingdom.TurnDuration );
 
 	}
 
@@ -109,19 +237,6 @@ public partial class BaseUnit : AnimEntity
 			}
 
 			frameTime = 0f;
-
-		}
-
-	}
-
-	[Event.Tick]
-	public void HandleMovement()
-	{
-
-		if ( State == UnitState.Walk )
-		{
-
-			Position = Position + Vector3.Forward * 0.4f;
 
 		}
 

@@ -28,6 +28,7 @@ public partial class BaseStructure : ModelEntity
 		base.Spawn();
 
 		SetModel( StructureModel );
+		SetupPhysicsFromModel( PhysicsMotionType.Static );
 
 		Tags.Add( "Structure", $"{StructureName}", $"{StructureAlignment}" );
 

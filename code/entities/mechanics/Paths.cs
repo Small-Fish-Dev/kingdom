@@ -11,8 +11,7 @@ public enum WaypointStatus
 {
 
 	Free,
-	Taken,
-	Freeing
+	Taken
 
 }
 
@@ -20,12 +19,14 @@ public class Waypoint
 {
 
 	public Vector3 Position;
+	public Lane Lane;
 	public WaypointStatus Status = WaypointStatus.Free;
 
-	public Waypoint( Vector3 position )
+	public Waypoint( Vector3 position, Lane lane)
 	{
 
 		Position = position;
+		Lane = lane;
 
 	}
 
@@ -37,11 +38,14 @@ public class Lane
 	// Ideally it will never have anything above it or drops below, because that will screw this up
 
 	public List<Waypoint> Waypoints = new List<Waypoint>();
+	public Path OriginPath;
 
-	public Lane( Vector3 from, Vector3 to, Vector3 offset, float totalWaypoints, float totalDistance )
+	public Lane( Path originPath, Vector3 from, Vector3 to, Vector3 offset, float totalWaypoints, float totalDistance )
 	{
 
-		Waypoints.Add( new Waypoint( from ) ); // First waypoints are inside the fort and then spread out
+		OriginPath = originPath;
+
+		Waypoints.Add( new Waypoint( from, this ) ); // First waypoints are inside the fort and then spread out
 
 		Vector3 direction = ( to - from ).Normal;
 		float waypointDistance = totalDistance / ( totalWaypoints );
@@ -55,16 +59,16 @@ public class Lane
 				.WorldOnly()
 				.Run();
 
-			Waypoints.Add( new Waypoint( ray.EndPosition ) );
+			Waypoints.Add( new Waypoint( ray.EndPosition, this ) );
 
-			DebugOverlay.Sphere( ray.EndPosition, 5f, Color.Red, false, 15f );
+			DebugOverlay.Sphere( ray.EndPosition, 5f, Color.Red, true, float.PositiveInfinity);
 
 		}
 
-		Waypoints.Add( new Waypoint( to ) ); // Last waypoints are inside the fort
+		Waypoints.Add( new Waypoint( to, this ) ); // Last waypoints are inside the fort
 
-		DebugOverlay.Sphere( from, 8f, Color.Red, false, 15f );
-		DebugOverlay.Sphere( to, 8f, Color.Red, false, 15f );
+		DebugOverlay.Sphere( from, 8f, Color.Red, true, float.PositiveInfinity );
+		DebugOverlay.Sphere( to, 8f, Color.Red, true, float.PositiveInfinity );
 
 	}
 
@@ -106,7 +110,7 @@ public class Path
 
 			Vector3 offset = ( rightDirection * i - ( rightDirection * ( TotalLanes / 2 ) ) ) * LaneWidth;
 
-			Lane resultLane = new Lane( startingPos, endingPos, offset, totalWaypoints, distance );
+			Lane resultLane = new Lane( this, startingPos, endingPos, offset, totalWaypoints, distance );
 
 			Lanes.Add( resultLane );
 

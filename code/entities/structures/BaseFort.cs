@@ -3,23 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+
+[Library( "Structure.Base.BaseFort" )]
 public partial class BaseFort : BaseStructure
 {
 
-	public override string StructureName => "Base Capturable";
+	public override string StructureName => "Base Fort";
 	public override string StructureAlignment => "Base";
 	public override float ModelScale => 1f;
 	public override string StructureModel => "models/structures/base_fort.vmdl";
 	public virtual float EntranceDistance => 45f; // The lanes will begin at this offset from the center, so units won't stay hidden inside
 	public virtual float UnitsPerSecond => 0.3f; // How many units are generated each second inside of this fort
-	public virtual Type UnitsType => typeof( Peasant ); // Which units it generates
-	public virtual int StartingUnits => 10; // How many units are inside the castle that you need to defeat before capturing
+	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
+	public virtual int StartingUnits => 300; // How many units are inside the castle that you need to defeat before capturing
 	public virtual float GoldPerSecond => 0.5f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
 
 	[Net] public Client Holder { get; set; } = null; // Who's holding the fort
-	[Net] public Dictionary<Type, int> StoredUnits { get; set; } = new Dictionary<Type, int>();
+	[Net] public Dictionary<string, int> StoredUnits { get; set; } = new Dictionary<string, int>();
 	[Net] public Dictionary<BaseFort, Path> AvailablePaths { get; set; } = new Dictionary<BaseFort, Path>();
 
 	public BaseFort()
@@ -34,10 +36,10 @@ public partial class BaseFort : BaseStructure
 
 	}
 
-	public void AddUnits( Type unitType, int unitAmount )
+	public void AddUnits( string unitType, int unitAmount )
 	{
 
-		if ( unitType.IsSubclassOf( typeof( BaseUnit ) ) )
+		if ( Library.GetType( unitType ).IsSubclassOf( typeof( BaseUnit ) ) )
 		{
 
 			if ( StoredUnits.ContainsKey( unitType ) )
@@ -84,11 +86,13 @@ public partial class BaseFort : BaseStructure
 
 		DebugOverlay.Text( Position + Vector3.Up * 100f, $"Holder: {Holder?.Name}" );
 
+		if ( IsClient ) { return; } // TODO: Stored units work also clientside
+
 		int count = 0;
 		foreach ( var unit in StoredUnits )
 		{
 
-			DebugOverlay.Text( Position + Vector3.Up * 80f - count * 10f, $"{unit.Key.Name}: {unit.Value}" );
+			DebugOverlay.Text( Position + Vector3.Up * 80f - count * 10f, $"{unit.Key}: {unit.Value}" );
 			count++;
 
 		}
@@ -99,8 +103,6 @@ public partial class BaseFort : BaseStructure
 	public void HandleTurns()
 	{
 
-		if ( IsClient ) { return; }
-
 		if ( Holder != null && Holder.IsValid() )
 		{
 
@@ -110,14 +112,31 @@ public partial class BaseFort : BaseStructure
 				foreach ( var lane in path.Value.Lanes )
 				{
 
+					foreach ( var waypoint in lane.Waypoints )
+					{
+
+						DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}", Kingdom.TurnDuration );
+
+					}
+
 					foreach ( var unit in StoredUnits )
 					{
 
 						if ( unit.Value > 0 )
 						{
 
-							CreateUnit( unit.Key, this, path.Value, path.Value.Lanes.IndexOf( lane ) );
-							StoredUnits[unit.Key]--;
+							bool isBackwards = path.Value.FortFrom == this ? false : true;
+							int targetWaypoint = isBackwards ? 0 : lane.Waypoints.Count<Waypoint>() - 1;
+
+							if ( lane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
+							{
+
+								CreateUnit( unit.Key, path.Value, lane );
+								StoredUnits[unit.Key]--;
+								lane.Waypoints[targetWaypoint].Status = WaypointStatus.Taken;
+
+							}
+
 
 						}
 
@@ -131,13 +150,15 @@ public partial class BaseFort : BaseStructure
 
 	}
 
-	public void CreateUnit( Type unitType, BaseFort originalFort, Path originalPath, int laneID )
+	public void CreateUnit( string unitType, Path originalPath, Lane originalLane )
 	{
 
-		if ( unitType.IsSubclassOf( typeof( BaseUnit ) ) )
+		if ( Library.GetType( unitType ).IsSubclassOf( typeof( BaseUnit ) ) )
 		{
 
-			Library.Create<BaseUnit>( unitType ).SetupUnit( originalFort, originalPath, laneID );
+			var unit = Library.Create<BaseUnit>( unitType );
+			unit.SetupUnit( this, originalPath, originalLane );
+			unit.Spawn();
 
 		}
 

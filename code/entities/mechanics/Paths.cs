@@ -15,12 +15,12 @@ public enum WaypointStatus
 
 }
 
-public class Waypoint
+public partial class Waypoint : BaseNetworkable
 {
 
-	public Vector3 Position;
+	public Vector3 Position { get; set; }
 	public Lane Lane;
-	public WaypointStatus Status = WaypointStatus.Free;
+	[Net] public WaypointStatus Status { get; set; } = WaypointStatus.Free;
 
 	public Waypoint( Vector3 position, Lane lane)
 	{
@@ -32,49 +32,52 @@ public class Waypoint
 
 }
 
-public class Lane
+public class Lane : BaseNetworkable
 {
 
 	// Ideally it will never have anything above it or drops below, because that will screw this up
 
-	public List<Waypoint> Waypoints = new List<Waypoint>();
+	public Waypoint[] Waypoints;
 	public Path OriginPath;
 
-	public Lane( Path originPath, Vector3 from, Vector3 to, Vector3 offset, float totalWaypoints, float totalDistance )
+	public Lane() { }
+
+	public Lane( Path originPath, Vector3 from, Vector3 to, Vector3 offset, int totalWaypoints, float totalDistance )
 	{
 
 		OriginPath = originPath;
+		Waypoints = new Waypoint[totalWaypoints + 1];
 
-		Waypoints.Add( new Waypoint( from, this ) ); // First waypoints are inside the fort and then spread out
+		Waypoints[0] = new Waypoint( from, this ); // First waypoints are inside the fort and then spread out
 
 		Vector3 direction = ( to - from ).Normal;
 		float waypointDistance = totalDistance / ( totalWaypoints );
 		
-		for ( int i = 0; i < totalWaypoints - 1; i++ )
+		for ( int i = 1; i < totalWaypoints; i++ )
 		{
 
-			Vector3 rayPosition = Waypoints[i].Position + direction * waypointDistance + ( i == 0 ? offset : Vector3.Zero );
+			Vector3 rayPosition = Waypoints[i - 1].Position + direction * waypointDistance + ( i == 1 ? offset : Vector3.Zero );
 
 			TraceResult ray = Trace.Ray( rayPosition + Vector3.Up * 100f, rayPosition + Vector3.Down * 100f )
 				.WorldOnly()
 				.Run();
 
-			Waypoints.Add( new Waypoint( ray.EndPosition, this ) );
+			Waypoints[i] = new Waypoint( ray.EndPosition, this );
 
-			DebugOverlay.Sphere( ray.EndPosition, 5f, Color.Red, true, float.PositiveInfinity);
+			//DebugOverlay.Sphere( ray.EndPosition, 2f, Color.Red, true, float.PositiveInfinity);
 
 		}
 
-		Waypoints.Add( new Waypoint( to, this ) ); // Last waypoints are inside the fort
+		Waypoints[totalWaypoints] = new Waypoint( to, this ); // Last waypoints are inside the fort
 
-		DebugOverlay.Sphere( from, 8f, Color.Red, true, float.PositiveInfinity );
-		DebugOverlay.Sphere( to, 8f, Color.Red, true, float.PositiveInfinity );
+		//DebugOverlay.Sphere( from, 5f, Color.Red, true, float.PositiveInfinity );
+		//DebugOverlay.Sphere( to, 5f, Color.Red, true, float.PositiveInfinity );
 
 	}
 
 }
 
-public class Path
+public class Path : BaseNetworkable
 {
 
 	public int TotalLanes;
@@ -82,7 +85,9 @@ public class Path
 	public float LaneDensity;
 	public BaseFort FortFrom;
 	public BaseFort FortTo;
-	public List<Lane> Lanes = new List<Lane>();
+	public Lane[] Lanes;
+
+	public Path() { }
 
 	public Path( BaseFort from, BaseFort to, int totalLanes, float laneWidth, float laneDensity = 15f )
 	{
@@ -92,6 +97,7 @@ public class Path
 		TotalLanes = totalLanes;
 		LaneWidth = laneWidth;
 		LaneDensity = laneDensity;
+		Lanes = new Lane[totalLanes];
 
 	}
 
@@ -112,7 +118,7 @@ public class Path
 
 			Lane resultLane = new Lane( this, startingPos, endingPos, offset, totalWaypoints, distance );
 
-			Lanes.Add( resultLane );
+			Lanes[i] = resultLane;
 
 		}
 

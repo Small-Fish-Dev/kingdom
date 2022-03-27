@@ -12,6 +12,7 @@ public enum UnitState
 
 }
 
+[Library( "Unit.Base" )]
 public partial class BaseUnit : AnimEntity
 {
 
@@ -52,28 +53,33 @@ public partial class BaseUnit : AnimEntity
 
 
 	[Net] public UnitState State { get; set; } = UnitState.Idle;
-	[Net] public Waypoint OldWaypoint { get; set; }
+	public Waypoint OldWaypoint { get; set; }
 	[Net] public int CurrentWaypointID { get; set; } = 0;
-	[Net] public Lane CurrentLane { get; set; }
+	public Lane CurrentLane { get; set; }
 	[Net] public int CurrentLaneID { get; set; } = 0;
-	[Net] public Waypoint CurrentWaypoint { get; set; }
+	public Waypoint CurrentWaypoint { get; set; }
 	[Net] public Client Commander { get; set; }
 	[Net] public BaseFort OriginalFort { get; set; }
-	[Net] public Path OriginalPath { get; set; }
+	public Path OriginalPath { get; set; }
 	public bool IsBackwards { get; set; }
+	public bool IsSetup { get; set; } = false;
 
-	public void SetupUnit( BaseFort originalFort, Path originalPath, int laneID )
+	public void SetupUnit( BaseFort originalFort, Path originalPath, Lane originalLane )
 	{
 
 		OriginalFort = originalFort;
-		CurrentLaneID = laneID;
-		OriginalPath = originalPath;
-		CurrentLane = OriginalPath.Lanes[CurrentLaneID];
 		Commander = OriginalFort.Holder;
+		OriginalPath = originalPath;
+		CurrentLane = originalLane;
+		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane);
 		IsBackwards = CurrentLane.OriginPath.FortFrom == OriginalFort;
-		CurrentWaypointID = IsBackwards ? 0 : CurrentLane.Waypoints.Count - 1;
-		CurrentWaypoint = CurrentLane.Waypoints[ CurrentWaypointID ];
+		CurrentWaypoint = IsBackwards ? CurrentLane.Waypoints.Last<Waypoint>() : CurrentLane.Waypoints[0];
 		OldWaypoint = CurrentWaypoint;
+		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint);
+		IsSetup = true;
+
+		Position = CurrentWaypoint.Position;
+		Rotation = Rotation.LookAt( IsBackwards ? CurrentLane.OriginPath.FortFrom.Position - CurrentLane.OriginPath.FortTo.Position : CurrentLane.OriginPath.FortTo.Position - CurrentLane.OriginPath.FortFrom.Position );
 
 	}
 
@@ -83,8 +89,6 @@ public partial class BaseUnit : AnimEntity
 		base.Spawn();
 
 		SetModel( UnitModel );
-
-		Rotation = Rotation.LookAt( IsBackwards ? CurrentLane.OriginPath.FortFrom.Position - CurrentLane.OriginPath.FortTo.Position : CurrentLane.OriginPath.FortTo.Position - CurrentLane.OriginPath.FortFrom.Position );
 
 		Tags.Add( "Unit", $"{UnitName}", $"{UnitAlignment}" );
 
@@ -120,18 +124,17 @@ public partial class BaseUnit : AnimEntity
 	public void MoveTo( Waypoint destination )
 	{
 
-		if ( CanMoveTo( destination ) )
-		{
+		if ( !IsSetup ) { return; }
 
-			CurrentWaypoint.Status = WaypointStatus.Free;
-			destination.Status = WaypointStatus.Taken;
+		CurrentWaypoint.Status = WaypointStatus.Free;
+		destination.Status = WaypointStatus.Taken;
 
-			OldWaypoint = CurrentWaypoint;
-			CurrentWaypoint = destination;
+		OldWaypoint = CurrentWaypoint;
 
-			State = UnitState.Walk;
+		CurrentWaypoint = destination;
+		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint );
 
-		}
+		State = UnitState.Walk;
 
 	}
 
@@ -139,27 +142,18 @@ public partial class BaseUnit : AnimEntity
 	public void HandleTurnsMovement()
 	{
 
+		if ( !IsSetup ) { return; }
+
 		// Don't walk if it's attacking
 		if ( State == UnitState.Attack ) { return; }
 
 		int moveDirection = IsBackwards ? -1 : 1;
+		Waypoint targetWaypoint;
 
-		// Try moving forward
-		var targetWaypoint = CurrentLane.Waypoints[CurrentWaypointID + moveDirection];
-
-		if ( CanMoveTo( targetWaypoint ) )
+		if ( CurrentWaypointID + moveDirection > 0 && CurrentWaypointID + moveDirection < CurrentLane.Waypoints.Count() )
 		{
-
-			MoveTo( targetWaypoint );
-			return;
-
-		}
-
-		// Try moving right
-		if ( OriginalPath.Lanes[CurrentLaneID + 1] != null )
-		{
-
-			targetWaypoint = OriginalPath.Lanes[CurrentLaneID + 1].Waypoints[CurrentWaypointID + moveDirection];
+			// Try moving forward
+			targetWaypoint = CurrentLane.Waypoints[CurrentWaypointID + moveDirection];
 
 			if ( CanMoveTo( targetWaypoint ) )
 			{
@@ -169,33 +163,86 @@ public partial class BaseUnit : AnimEntity
 
 			}
 
-		}
-
-		// Try moving left
-		if ( OriginalPath.Lanes[CurrentLaneID - 1] != null )
-		{
-
-			targetWaypoint = OriginalPath.Lanes[CurrentLaneID - 1].Waypoints[CurrentWaypointID + moveDirection];
-
-			if ( CanMoveTo( targetWaypoint ) )
+			// Try moving forward right
+			if ( CurrentLaneID < OriginalPath.Lanes.Count() - 1 && OriginalPath.Lanes[CurrentLaneID + 1] != null )
 			{
 
-				MoveTo( targetWaypoint );
-				return;
+				targetWaypoint = OriginalPath.Lanes[CurrentLaneID + 1].Waypoints[CurrentWaypointID + moveDirection];
+
+				if ( CanMoveTo( targetWaypoint ) )
+				{
+
+					MoveTo( targetWaypoint );
+					return;
+
+				}
+
+			}
+
+			// Try moving forward left
+			if ( CurrentLaneID > 0 && OriginalPath.Lanes[CurrentLaneID - 1] != null )
+			{
+
+				targetWaypoint = OriginalPath.Lanes[CurrentLaneID - 1].Waypoints[CurrentWaypointID + moveDirection];
+
+				if ( CanMoveTo( targetWaypoint ) )
+				{
+
+					MoveTo( targetWaypoint );
+					return;
+
+				}
+
+			}
+
+			// Try moving right
+			if ( CurrentLaneID < OriginalPath.Lanes.Count() - 1 && OriginalPath.Lanes[CurrentLaneID + 1] != null )
+			{
+
+				targetWaypoint = OriginalPath.Lanes[CurrentLaneID + 1].Waypoints[CurrentWaypointID];
+
+				if ( CanMoveTo( targetWaypoint ) )
+				{
+
+					MoveTo( targetWaypoint );
+					return;
+
+				}
+
+			}
+
+			// Try moving left
+			if ( CurrentLaneID > 0 && OriginalPath.Lanes[CurrentLaneID - 1] != null )
+			{
+
+				targetWaypoint = OriginalPath.Lanes[CurrentLaneID - 1].Waypoints[CurrentWaypointID];
+
+				if ( CanMoveTo( targetWaypoint ) )
+				{
+
+					MoveTo( targetWaypoint );
+					return;
+
+				}
 
 			}
 
 		}
 
 		State = UnitState.Idle;
+		OldWaypoint = CurrentWaypoint;
 
 	}
 
+	Vector3 randomOffset = new Vector3( Rand.Float( -4f, 4f ), Rand.Float( -4f, 4f ), 0 );
 	[Event.Tick]
 	public void HandleMovement()
 	{
 
-		Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, 10f * Time.Delta / Kingdom.TurnDuration );
+		if ( !IsSetup ) { return; }
+		//TODO add small offset to break up perfect lines
+		//TODO Walking animation is offset from center, grod needs to fix it
+		Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
 
 	}
 
@@ -223,7 +270,7 @@ public partial class BaseUnit : AnimEntity
 				if ( hasAttacked == false )
 				{
 
-					DebugOverlay.Sphere( Position + Rotation.Forward * 5f, 5f, Color.Red, true, 0.3f );
+					//DebugOverlay.Sphere( Position + Rotation.Forward * 5f, 5f, Color.Red, true, 0.3f );
 					hasAttacked = true;
 
 				}

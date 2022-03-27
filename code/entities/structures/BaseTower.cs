@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+[Library( "Structure.Base.BaseTower" )]
 public partial class BaseTower : BaseStructure
 {
 

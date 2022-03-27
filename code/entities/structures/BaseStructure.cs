@@ -12,6 +12,7 @@ public enum StructureType
 
 }
 
+[Library( "Structure.Base" )]
 public partial class BaseStructure : ModelEntity
 {
 

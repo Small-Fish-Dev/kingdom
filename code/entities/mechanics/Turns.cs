@@ -12,26 +12,26 @@ public partial class Kingdom : Sandbox.Game
 {
 
 	public const float TurnDuration = 1f; // How long a turn lasts in seconds
+	public static TimeSince LastTurn = 0;
 
 	[Event( "Kingdom_Next_Turn" ), ClientRpc]
 	public static void Test()
 	{
 
 		Event.Run( "Kingdrom_Next_Turn" );
+		Kingdom.LastTurn = 0;
 
 	}
-
-	TimeSince lastTurn = 0;
 
 	[Event.Tick.Server]
 	public void HandleTurns()
 	{
 
-		if ( lastTurn >= TurnDuration )
+		if ( LastTurn >= TurnDuration )
 		{
 
 			Event.Run( "Kingdom_Next_Turn" );
-			lastTurn = 0;
+			LastTurn = 0;
 
 		}
 

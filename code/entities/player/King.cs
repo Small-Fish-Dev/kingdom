@@ -1,11 +1,13 @@
 ﻿using Sandbox;
+using Sandbox.Component;
 using System;
 using System.Linq;
 
-partial class King : Player
+public partial class King : Player
 {
 
 	public Clothing.Container Clothing = new();
+	[Net] public int Gold { get; set; } = 0;
 
 	public King() { }
 	public King( Client cl )
@@ -36,6 +38,7 @@ partial class King : Player
 
 	public override void Simulate( Client cl )
 	{
+
 		base.Simulate( cl );
 
 		//TickPlayerUse();
@@ -53,24 +56,7 @@ partial class King : Player
 			}
 		}
 
-		if ( Input.Pressed( InputButton.Attack1 ) )
-		{
-
-			if ( IsClient ) { return; }
-
-			TraceResult tr = Trace.Ray( Input.Cursor, 5000f )
-				.Ignore( this )
-				.Run();
-
-			for ( int i = 0; i < 100; i++ )
-			{
-
-				BaseUnit unit = new Peasant();
-				unit.Position = tr.EndPosition + new Vector3( ( i % 10 - 5 ) * 20f, (int)( i / 10 - 5 ) * 20f, 0 );
-
-			}
-
-		}
+		HandleInteractions();
 
 	}
 

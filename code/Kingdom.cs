@@ -11,28 +11,23 @@ public partial class Kingdom : Sandbox.Game
 	public Kingdom()
 	{
 
+		Precache.Add( "models/kingdom_citizen/kingdom_citizen.vmdl" );
+
 	}
 
-	/// <summary>
-	/// A client has joined the server. Make them a pawn to play with
-	/// </summary>
 	public override void ClientJoined( Client client )
 	{
 
 		base.ClientJoined( client );
 
-		// Create a pawn for this client to play with
 		var pawn = new King(client);
 		client.Pawn = pawn;
 		pawn.Respawn();
 
-		// Get all of the spawnpoints
 		var spawnpoints = Entity.All.OfType<SpawnPoint>();
 
-		// chose a random one
 		var randomSpawnPoint = spawnpoints.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
 
-		// if it exists, place the pawn there
 		if ( randomSpawnPoint != null )
 		{
 
@@ -43,4 +38,5 @@ public partial class Kingdom : Sandbox.Game
 		}
 
 	}
+	
 }

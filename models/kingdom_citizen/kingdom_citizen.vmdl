@@ -160,7 +160,7 @@
 										hidden = false
 										anim_markup_ordered = false
 										disable_compression = false
-										source_filename = "models/citizen/animations/Citizen@Walk_N.fbx"
+										source_filename = "models/kingdom_citizen/walk_n.dmx"
 										start_frame = -1
 										end_frame = -1
 										framerate = -1.0
@@ -202,7 +202,7 @@
 										hidden = false
 										anim_markup_ordered = false
 										disable_compression = false
-										source_filename = "models/citizen/animations/Citizen@Run_N.fbx"
+										source_filename = "models/kingdom_citizen/run_n.dmx"
 										start_frame = -1
 										end_frame = -1
 										framerate = -1.0

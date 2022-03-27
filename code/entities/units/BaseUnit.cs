@@ -107,6 +107,45 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
+	public bool IsValidWaypoint( int waypointID, int laneID )
+	{
+
+		if ( laneID >= 0 && laneID < OriginalPath.Lanes.Count() )
+		{
+
+			if ( waypointID >= 0 && waypointID < CurrentLane.Waypoints.Count() )
+			{
+
+				return true;
+
+			}
+
+		}
+
+		return false;
+
+	}
+
+	public Waypoint FindWaypoint( int forward, int right )
+	{
+
+		Waypoint targetWaypoint = CurrentWaypoint;
+
+		int moveDirection = IsBackwards ? -1 : 1;
+		int waypointID = CurrentWaypointID + forward * moveDirection;
+		int laneID = CurrentLaneID + right * moveDirection;
+
+		if ( IsValidWaypoint( waypointID, laneID ) )
+		{
+
+			targetWaypoint = OriginalPath.Lanes[laneID].Waypoints[waypointID];
+
+		}
+
+		return targetWaypoint;
+
+	}
+
 	public bool CanMoveTo( Waypoint destination )
 	{
 
@@ -131,6 +170,8 @@ public partial class BaseUnit : AnimEntity
 
 		OldWaypoint = CurrentWaypoint;
 
+		CurrentLane = destination.Lane;
+		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane );
 		CurrentWaypoint = destination;
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint );
 
@@ -147,75 +188,14 @@ public partial class BaseUnit : AnimEntity
 		// Don't walk if it's attacking
 		if ( State == UnitState.Attack ) { return; }
 
-		int moveDirection = IsBackwards ? -1 : 1;
-		Waypoint targetWaypoint;
-
-		if ( CurrentWaypointID + moveDirection > 0 && CurrentWaypointID + moveDirection < CurrentLane.Waypoints.Count() )
+		for ( int i = 1; i < 4; i++ )
 		{
-			// Try moving forward
-			targetWaypoint = CurrentLane.Waypoints[CurrentWaypointID + moveDirection];
 
-			if ( CanMoveTo( targetWaypoint ) )
+			//First try walking forward, then right, then left
+			Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
+
+			if ( targetWaypoint != CurrentWaypoint )
 			{
-
-				MoveTo( targetWaypoint );
-				return;
-
-			}
-
-			// Try moving forward right
-			if ( CurrentLaneID < OriginalPath.Lanes.Count() - 1 && OriginalPath.Lanes[CurrentLaneID + 1] != null )
-			{
-
-				targetWaypoint = OriginalPath.Lanes[CurrentLaneID + 1].Waypoints[CurrentWaypointID + moveDirection];
-
-				if ( CanMoveTo( targetWaypoint ) )
-				{
-
-					MoveTo( targetWaypoint );
-					return;
-
-				}
-
-			}
-
-			// Try moving forward left
-			if ( CurrentLaneID > 0 && OriginalPath.Lanes[CurrentLaneID - 1] != null )
-			{
-
-				targetWaypoint = OriginalPath.Lanes[CurrentLaneID - 1].Waypoints[CurrentWaypointID + moveDirection];
-
-				if ( CanMoveTo( targetWaypoint ) )
-				{
-
-					MoveTo( targetWaypoint );
-					return;
-
-				}
-
-			}
-
-			// Try moving right
-			if ( CurrentLaneID < OriginalPath.Lanes.Count() - 1 && OriginalPath.Lanes[CurrentLaneID + 1] != null )
-			{
-
-				targetWaypoint = OriginalPath.Lanes[CurrentLaneID + 1].Waypoints[CurrentWaypointID];
-
-				if ( CanMoveTo( targetWaypoint ) )
-				{
-
-					MoveTo( targetWaypoint );
-					return;
-
-				}
-
-			}
-
-			// Try moving left
-			if ( CurrentLaneID > 0 && OriginalPath.Lanes[CurrentLaneID - 1] != null )
-			{
-
-				targetWaypoint = OriginalPath.Lanes[CurrentLaneID - 1].Waypoints[CurrentWaypointID];
 
 				if ( CanMoveTo( targetWaypoint ) )
 				{
@@ -229,6 +209,7 @@ public partial class BaseUnit : AnimEntity
 
 		}
 
+		// If nothing works just idle
 		State = UnitState.Idle;
 		OldWaypoint = CurrentWaypoint;
 

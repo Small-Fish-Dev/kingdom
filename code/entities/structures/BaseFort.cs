@@ -115,30 +115,32 @@ public partial class BaseFort : BaseStructure
 					foreach ( var waypoint in lane.Waypoints )
 					{
 
-						DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}", Kingdom.TurnDuration );
+						//DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}", Kingdom.TurnDuration );
 
 					}
 
-					foreach ( var unit in StoredUnits )
+				}
+
+				foreach ( var unit in StoredUnits )
+				{
+
+					if ( unit.Value > 0 )
 					{
 
-						if ( unit.Value > 0 )
+						Lane middleLane = path.Value.Lanes[Rand.Int(0, 4)];
+
+						bool isBackwards = path.Value.FortFrom == this ? false : true;
+						int targetWaypoint = isBackwards ? 0 : middleLane.Waypoints.Count<Waypoint>() - 1;
+
+						if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
 						{
 
-							bool isBackwards = path.Value.FortFrom == this ? false : true;
-							int targetWaypoint = isBackwards ? 0 : lane.Waypoints.Count<Waypoint>() - 1;
-
-							if ( lane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
-							{
-
-								CreateUnit( unit.Key, path.Value, lane );
-								StoredUnits[unit.Key]--;
-								lane.Waypoints[targetWaypoint].Status = WaypointStatus.Taken;
-
-							}
-
+							CreateUnit( unit.Key, path.Value, middleLane );
+							StoredUnits[unit.Key]--;
+							middleLane.Waypoints[targetWaypoint].Status = WaypointStatus.Taken;
 
 						}
+
 
 					}
 

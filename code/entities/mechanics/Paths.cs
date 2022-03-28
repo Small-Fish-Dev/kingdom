@@ -64,14 +64,14 @@ public class Lane : BaseNetworkable
 
 			Waypoints[i] = new Waypoint( ray.EndPosition, this );
 
-			//DebugOverlay.Sphere( ray.EndPosition, 2f, Color.Red, true, float.PositiveInfinity);
+			DebugOverlay.Sphere( ray.EndPosition, 2f, Color.Red, true, float.PositiveInfinity);
 
 		}
 
 		Waypoints[totalWaypoints] = new Waypoint( to, this ); // Last waypoints are inside the fort
 
-		//DebugOverlay.Sphere( from, 5f, Color.Red, true, float.PositiveInfinity );
-		//DebugOverlay.Sphere( to, 5f, Color.Red, true, float.PositiveInfinity );
+		DebugOverlay.Sphere( from, 5f, Color.Red, true, float.PositiveInfinity );
+		DebugOverlay.Sphere( to, 5f, Color.Red, true, float.PositiveInfinity );
 
 	}
 
@@ -162,5 +162,33 @@ public partial class Kingdom
 		}
 
 	}
-	
+
+	[ServerCmd( "delete_paths" )]
+	public static void DeletePaths()
+	{
+
+		foreach ( BaseFort fort in Kingdom.Forts )
+		{
+
+			foreach ( var path in fort.AvailablePaths )
+			{
+
+				foreach ( Lane lane in path.Value.Lanes )
+				{
+
+					for ( int i = 0; i < lane.Waypoints.Count(); i++ )
+					{
+
+						lane.Waypoints[i] = null;
+
+					}
+
+				}
+
+			}
+
+		}
+
+	}
+
 }

@@ -52,14 +52,16 @@ public partial class BaseUnit : AnimEntity
 	public virtual float AttackKeyframe => 0.2f; // At which point of the attack animation damage is dealt ( Seconds )
 
 
-	[Net] public UnitState State { get; set; } = UnitState.Idle;
+	[Net] public UnitState State { get; set; } = UnitState.Walk;
 	public Waypoint OldWaypoint { get; set; }
 	[Net] public int CurrentWaypointID { get; set; } = 0;
 	public Lane CurrentLane { get; set; }
 	[Net] public int CurrentLaneID { get; set; } = 0;
 	public Waypoint CurrentWaypoint { get; set; }
-	[Net] public Client Commander { get; set; }
-	[Net] public BaseFort OriginalFort { get; set; }
+	public Client Commander { get; set; }
+	[Net] BaseUnit Target { get; set; }
+	public bool IsFirst = false;
+	public BaseFort OriginalFort { get; set; }
 	public Path OriginalPath { get; set; }
 	public bool IsBackwards { get; set; }
 	public bool IsSetup { get; set; } = false;
@@ -76,6 +78,10 @@ public partial class BaseUnit : AnimEntity
 		CurrentWaypoint = IsBackwards ? CurrentLane.Waypoints.Last<Waypoint>() : CurrentLane.Waypoints[0];
 		OldWaypoint = CurrentWaypoint;
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint);
+		CurrentWaypoint.Status = WaypointStatus.Taken;
+		CurrentWaypoint.Unit = this;
+		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
+
 		IsSetup = true;
 
 		Position = CurrentWaypoint.Position;
@@ -168,6 +174,8 @@ public partial class BaseUnit : AnimEntity
 		CurrentWaypoint.Status = WaypointStatus.Free;
 		destination.Status = WaypointStatus.Taken;
 
+		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
+
 		OldWaypoint = CurrentWaypoint;
 
 		CurrentLane = destination.Lane;
@@ -175,43 +183,93 @@ public partial class BaseUnit : AnimEntity
 		CurrentWaypoint = destination;
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint );
 
+		OldWaypoint.Unit = null;
+		CurrentWaypoint.Unit = this;
+
+		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
+
 		State = UnitState.Walk;
 
 	}
 
 	[Event("Kingdom_Next_Turn")]
-	public void HandleTurnsMovement()
+	public void HandleTurns()
 	{
 
 		if ( !IsSetup ) { return; }
 
-		// Don't walk if it's attacking
-		if ( State == UnitState.Attack ) { return; }
-
-		for ( int i = 1; i < 4; i++ )
+		/*for ( int i = 0; i < OriginalPath.TotalLanes; i++ )
 		{
 
-			//First try walking forward, then right, then left
-			Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
+			Waypoint waypointCheck = FindWaypoint( 1, i );
+			BaseUnit unitFound = waypointCheck.Unit;
 
-			if ( targetWaypoint != CurrentWaypoint )
+			if ( unitFound != null && unitFound.Commander != Commander )
 			{
 
-				if ( CanMoveTo( targetWaypoint ) )
+				if ( unitFound.Target == null )
 				{
 
-					MoveTo( targetWaypoint );
-					return;
+					unitFound.Target = this;
+					Target = unitFound;
 
 				}
 
 			}
 
-		}
+		}*/
+		
+		switch ( State )
+		{
 
-		// If nothing works just idle
-		State = UnitState.Idle;
-		OldWaypoint = CurrentWaypoint;
+			case UnitState.Walk:
+				{
+
+					for ( int i = 1; i < 4; i++ )
+					{
+
+						//First try walking forward, then right, then left
+						Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
+						
+						if ( targetWaypoint != CurrentWaypoint )
+						{
+
+							if ( CanMoveTo( targetWaypoint ) )
+							{
+
+								MoveTo( targetWaypoint );
+								return;
+
+							}
+
+						}
+
+					}
+
+					State = UnitState.Idle;
+
+					break;
+				}
+
+			case UnitState.Attack:
+				{
+
+
+
+					break;
+
+				}
+
+			case UnitState.Idle:
+				{
+
+					break;
+
+				}
+
+			default: break;
+
+		}
 
 	}
 
@@ -221,9 +279,20 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		if ( !IsSetup ) { return; }
-		//TODO add small offset to break up perfect lines
-		//TODO Walking animation is offset from center, grod needs to fix it
-		Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
+
+		if ( State == UnitState.Walk )
+		{
+
+			Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
+
+		}
+
+		if ( IsFirst )
+		{
+
+			DebugOverlay.Sphere( Position, 5f, Color.Green );
+
+		}
 
 	}
 

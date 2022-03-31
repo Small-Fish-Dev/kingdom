@@ -20,6 +20,7 @@ public partial class Waypoint : BaseNetworkable
 
 	public Vector3 Position { get; set; }
 	public Lane Lane;
+	[Net] public BaseUnit Unit { get; set; }
 	[Net] public WaypointStatus Status { get; set; } = WaypointStatus.Free;
 
 	public Waypoint( Vector3 position, Lane lane)
@@ -39,6 +40,7 @@ public class Lane : BaseNetworkable
 
 	public Waypoint[] Waypoints;
 	public Path OriginPath;
+	[Net] public Dictionary<BaseFort, BaseUnit[]> UnitLaneMap { get; set; } = new Dictionary<BaseFort, BaseUnit[]>();
 
 	public Lane() { }
 
@@ -69,6 +71,9 @@ public class Lane : BaseNetworkable
 		}
 
 		Waypoints[totalWaypoints] = new Waypoint( to, this ); // Last waypoints are inside the fort
+
+		UnitLaneMap.Add( OriginPath.FortFrom, new BaseUnit[totalWaypoints + 1] );
+		UnitLaneMap.Add( OriginPath.FortTo, new BaseUnit[totalWaypoints + 1] );
 
 		DebugOverlay.Sphere( from, 5f, Color.Red, true, float.PositiveInfinity );
 		DebugOverlay.Sphere( to, 5f, Color.Red, true, float.PositiveInfinity );
@@ -121,6 +126,42 @@ public class Path : BaseNetworkable
 			Lanes[i] = resultLane;
 
 		}
+
+	}
+
+	public List<BaseUnit> GetFirstUnits( BaseFort fort )
+	{
+
+		List<BaseUnit> result = new List<BaseUnit>();
+
+		foreach ( var lanes in Lanes )
+		{
+
+			BaseUnit laneUnit = null;
+
+			if ( fort == FortFrom )
+			{
+
+				laneUnit = lanes.UnitLaneMap[fort].FirstOrDefault( unit => unit != null, null);
+
+			}
+			else
+			{
+
+				laneUnit = lanes.UnitLaneMap[fort].LastOrDefault( unit => unit != null, null );
+
+			}
+
+			if ( laneUnit != null )
+			{
+
+				result.Add( laneUnit );
+
+			}
+
+		}
+
+		return result;
 
 	}
 

@@ -99,6 +99,8 @@ public partial class BaseFort : BaseStructure
 
 	}
 
+	Dictionary<Path, List<BaseUnit>> firstUnits = new Dictionary<Path, List<BaseUnit>>();
+
 	[Event("Kingdom_Next_Turn")]
 	public void HandleTurns()
 	{
@@ -108,6 +110,30 @@ public partial class BaseFort : BaseStructure
 
 			foreach ( var path in AvailablePaths )
 			{
+
+				if ( !firstUnits.ContainsKey( path.Value ) )
+				{
+
+					firstUnits.Add( path.Value, new List<BaseUnit>() );
+
+				}
+
+				foreach ( var unit in firstUnits[path.Value] )
+				{
+
+					unit.IsFirst = false;
+
+				}
+
+				firstUnits[path.Value].Clear();
+				firstUnits[path.Value] = path.Value.GetFirstUnits( this );
+
+				foreach ( var unit in firstUnits[path.Value] )
+				{
+
+					unit.IsFirst = true;
+
+				}
 
 				foreach ( var lane in path.Value.Lanes )
 				{
@@ -124,23 +150,28 @@ public partial class BaseFort : BaseStructure
 				foreach ( var unit in StoredUnits )
 				{
 
-					if ( unit.Value > 0 )
+					for( int i = 0; i < 3; i++ )
 					{
 
-						Lane middleLane = path.Value.Lanes[Rand.Int(0, 4)];
-
-						bool isBackwards = path.Value.FortFrom == this ? false : true;
-						int targetWaypoint = isBackwards ? 0 : middleLane.Waypoints.Count<Waypoint>() - 1;
-
-						if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
+						if ( unit.Value > 0 )
 						{
 
-							CreateUnit( unit.Key, path.Value, middleLane );
-							StoredUnits[unit.Key]--;
-							middleLane.Waypoints[targetWaypoint].Status = WaypointStatus.Taken;
+							Lane middleLane = path.Value.Lanes[Rand.Int( 0, 4 )];
+
+							bool isBackwards = path.Value.FortFrom == this ? false : true;
+							int targetWaypoint = isBackwards ? 0 : middleLane.Waypoints.Count<Waypoint>() - 1;
+
+							if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
+							{
+
+								CreateUnit( unit.Key, path.Value, middleLane );
+								StoredUnits[unit.Key]--;
+								middleLane.Waypoints[targetWaypoint].Status = WaypointStatus.Taken;
+
+							}
+
 
 						}
-
 
 					}
 
@@ -160,6 +191,7 @@ public partial class BaseFort : BaseStructure
 
 			var unit = Library.Create<BaseUnit>( unitType );
 			unit.SetupUnit( this, originalPath, originalLane );
+			unit.Commander = Holder;
 			unit.Spawn();
 
 		}

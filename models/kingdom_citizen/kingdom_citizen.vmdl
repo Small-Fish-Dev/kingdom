@@ -54,6 +54,43 @@
 					{
 						_class = "RenderMeshFile"
 						name = "LOD4"
+						children = 
+						[
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"eye_L",
+									"eye_R",
+									"face_lid_lower_L",
+									"face_lid_lower_R",
+									"face_lid_upper_L",
+									"face_lid_upper_R",
+								]
+							},
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"hand_L",
+									"hand_R",
+									"ankle_L",
+									"ankle_R",
+									"arm_lower_L_twist",
+									"arm_lower_R_twist",
+									"arm_upper_L_twist",
+									"arm_upper_R_twist",
+									"leg_lower_L_twist",
+									"leg_lower_R_twist",
+									"leg_upper_L_twist",
+									"leg_upper_R_twist",
+									"arm_elbow_helper_L",
+									"arm_elbow_helper_R",
+									"leg_knee_helper_L",
+									"leg_knee_helper_R",
+								]
+							},
+						]
 						filename = "models/kingdom_citizen/kingdom_citizen_lod4.dmx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
@@ -71,6 +108,21 @@
 					{
 						_class = "RenderMeshFile"
 						name = "Body_LOD0"
+						children = 
+						[
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"eye_L",
+									"eye_R",
+									"face_lid_lower_L",
+									"face_lid_lower_R",
+									"face_lid_upper_L",
+									"face_lid_upper_R",
+								]
+							},
+						]
 						filename = "models/citizen/citizen.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
@@ -95,6 +147,43 @@
 					{
 						_class = "RenderMeshFile"
 						name = "Body_LOD3"
+						children = 
+						[
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"eye_L",
+									"eye_R",
+									"face_lid_lower_L",
+									"face_lid_lower_R",
+									"face_lid_upper_L",
+									"face_lid_upper_R",
+								]
+							},
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"hand_L",
+									"hand_R",
+									"ankle_L",
+									"ankle_R",
+									"arm_lower_L_twist",
+									"arm_lower_R_twist",
+									"arm_upper_L_twist",
+									"arm_upper_R_twist",
+									"leg_lower_L_twist",
+									"leg_lower_R_twist",
+									"leg_upper_L_twist",
+									"leg_upper_R_twist",
+									"arm_elbow_helper_L",
+									"arm_elbow_helper_R",
+									"leg_knee_helper_L",
+									"leg_knee_helper_R",
+								]
+							},
+						]
 						filename = "models/citizen/citizen_lod3.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
@@ -430,10 +519,6 @@
 					},
 				]
 				default_root_bone_name = "pelvis"
-			},
-			{
-				_class = "BoneMarkupList"
-				bone_cull_type = "None"
 			},
 			{
 				_class = "WeightListList"

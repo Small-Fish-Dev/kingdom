@@ -195,7 +195,7 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
-	[Event("Kingdom_Next_Turn")]
+	[Event("Kingdom_Turn")]
 	public void HandleTurns()
 	{
 
@@ -204,7 +204,7 @@ public partial class BaseUnit : AnimEntity
 		if ( IsFirst )
 		{
 
-			for ( int y = 0; y < AttackRange; y++ )
+			for ( int y = 0; y <= AttackRange; y++ )
 			{
 
 				for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
@@ -213,16 +213,16 @@ public partial class BaseUnit : AnimEntity
 					Waypoint waypointCheck = FindWaypoint( y, x );
 					BaseUnit unitFound = waypointCheck.Unit;
 
-					if ( unitFound != null && unitFound.IsBackwards != IsBackwards && unitFound.Commander != Commander )
+					if ( unitFound != null && unitFound != this )
 					{
 
-						if ( unitFound.Target == null )
+						if ( unitFound.IsBackwards != IsBackwards )//( unitFound.Commander != Commander )
 						{
-							//TODO FINISH THIS
-							//unitFound.Target = this;
-							Target = unitFound;
-							Target.Delete();
-							Target = null;
+
+							unitFound.Kill();
+							Kill();
+
+							return;
 
 						}
 
@@ -234,7 +234,7 @@ public partial class BaseUnit : AnimEntity
 
 		}
 
-		if ( OldWaypoint == CurrentWaypoint && CurrentWaypointID == ( IsBackwards ? 0 : CurrentLane.Waypoints.Length - 1 ) )
+		if ( CurrentWaypointID == ( IsBackwards ? 0 : CurrentLane.Waypoints.Length - 1 ) )
 		{
 
 			Kill();
@@ -285,6 +285,27 @@ public partial class BaseUnit : AnimEntity
 
 			case UnitState.Idle:
 				{
+
+					for ( int i = 1; i < 4; i++ )
+					{
+
+						//First try walking forward, then right, then left
+						Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
+
+						if ( targetWaypoint != CurrentWaypoint )
+						{
+
+							if ( CanMoveTo( targetWaypoint ) )
+							{
+
+								MoveTo( targetWaypoint );
+								return;
+
+							}
+
+						}
+
+					}
 
 					break;
 
@@ -365,17 +386,26 @@ public partial class BaseUnit : AnimEntity
 	public void Kill( bool silent = false )
 	{
 
+		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
 		CurrentWaypoint.Status = WaypointStatus.Free;
-		OldWaypoint.Status = WaypointStatus.Free;
+		CurrentWaypoint.Unit = null;
 
 		if ( !silent )
 		{
 
-			Particles.Create( "particles/dead_citizen.vpcf", this.Position );
+			CreateClientParticle( "particles/dead_citizen.vpcf", this.Position );
 
 		}
 
 		Delete();
+
+	}
+
+	[ClientRpc]
+	public void CreateClientParticle( string name, Vector3 position )
+	{
+
+		Particles.Create( name, position );
 
 	}
 

@@ -61,7 +61,7 @@
 							},
 						]
 						filename = "models/kingdom_citizen/kingdom_citizen_lod4.dmx"
-						import_translation = [ 0.0, 0.0, -50.0 ]
+						import_translation = [ 0.0, 0.0, -80.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
 						align_origin_x_type = "None"
@@ -84,7 +84,7 @@
 							},
 						]
 						filename = "models/citizen/citizen.fbx"
-						import_translation = [ 0.0, 0.0, -50.0 ]
+						import_translation = [ 0.0, 0.0, -80.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
 						align_origin_x_type = "None"
@@ -114,7 +114,7 @@
 							},
 						]
 						filename = "models/citizen/citizen_lod3.fbx"
-						import_translation = [ 0.0, 0.0, -50.0 ]
+						import_translation = [ 0.0, 0.0, -80.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
 						align_origin_x_type = "None"

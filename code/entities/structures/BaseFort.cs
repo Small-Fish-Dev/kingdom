@@ -12,11 +12,11 @@ public partial class BaseFort : BaseStructure
 	public override string StructureAlignment => "Base";
 	public override float ModelScale => 1f;
 	public override string StructureModel => "models/structures/base_fort.vmdl";
-	public virtual float EntranceDistance => 45f; // The lanes will begin at this offset from the center, so units won't stay hidden inside
-	public virtual float UnitsPerSecond => 0.3f; // How many units are generated each second inside of this fort
+	public virtual float EntranceDistance => 45f; // The lanes won't begin at the center
+	public virtual float UnitsPerSecond => 1f; // How many units are generated each second inside of this fort
 	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
-	public virtual int StartingUnits => 300; // How many units are inside the castle that you need to defeat before capturing
-	public virtual float GoldPerSecond => 0.5f; // How much gold it generates each second
+	public virtual int StartingUnits => 100; // How many units are inside the castle that you need to defeat before capturing
+	public virtual float GoldPerSecond => 1f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
 
@@ -150,16 +150,16 @@ public partial class BaseFort : BaseStructure
 				foreach ( var unit in StoredUnits )
 				{
 
-					for( int i = 0; i < 3; i++ )
+					for( int i = 0; i < 2; i++ )
 					{
 
 						if ( unit.Value > 0 )
 						{
 
-							Lane middleLane = path.Value.Lanes[Rand.Int( 0, 4 )];
+							Lane middleLane = path.Value.Lanes[i];//Rand.Int( 0, path.Value.TotalLanes - 1 )];
 
 							bool isBackwards = path.Value.FortFrom == this ? false : true;
-							int targetWaypoint = isBackwards ? 0 : middleLane.Waypoints.Count<Waypoint>() - 1;
+							int targetWaypoint = isBackwards ? middleLane.Waypoints.Count<Waypoint>() - 1 : 0;
 
 							if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
 							{
@@ -167,6 +167,7 @@ public partial class BaseFort : BaseStructure
 								CreateUnit( unit.Key, path.Value, middleLane );
 								StoredUnits[unit.Key]--;
 								middleLane.Waypoints[targetWaypoint].Status = WaypointStatus.Taken;
+								break;
 
 							}
 

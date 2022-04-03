@@ -74,10 +74,11 @@ public partial class BaseUnit : AnimEntity
 		OriginalPath = originalPath;
 		CurrentLane = originalLane;
 		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane);
-		IsBackwards = CurrentLane.OriginPath.FortFrom == OriginalFort;
+		IsBackwards = CurrentLane.OriginPath.FortTo == OriginalFort;
 		CurrentWaypoint = IsBackwards ? CurrentLane.Waypoints.Last<Waypoint>() : CurrentLane.Waypoints[0];
 		OldWaypoint = CurrentWaypoint;
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint);
+		OldWaypoint.Status = WaypointStatus.Taken;
 		CurrentWaypoint.Status = WaypointStatus.Taken;
 		CurrentWaypoint.Unit = this;
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
@@ -188,6 +189,8 @@ public partial class BaseUnit : AnimEntity
 
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
 
+		Rotation = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
+
 		State = UnitState.Walk;
 
 	}
@@ -198,26 +201,45 @@ public partial class BaseUnit : AnimEntity
 
 		if ( !IsSetup ) { return; }
 
-		/*for ( int i = 0; i < OriginalPath.TotalLanes; i++ )
+		if ( IsFirst )
 		{
 
-			Waypoint waypointCheck = FindWaypoint( 1, i );
-			BaseUnit unitFound = waypointCheck.Unit;
-
-			if ( unitFound != null && unitFound.Commander != Commander )
+			for ( int y = 0; y < AttackRange; y++ )
 			{
 
-				if ( unitFound.Target == null )
+				for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
 				{
 
-					unitFound.Target = this;
-					Target = unitFound;
+					Waypoint waypointCheck = FindWaypoint( y, x );
+					BaseUnit unitFound = waypointCheck.Unit;
+
+					if ( unitFound != null && unitFound.IsBackwards != IsBackwards && unitFound.Commander != Commander )
+					{
+
+						if ( unitFound.Target == null )
+						{
+							//TODO FINISH THIS
+							//unitFound.Target = this;
+							Target = unitFound;
+							Target.Delete();
+							Target = null;
+
+						}
+
+					}
 
 				}
 
 			}
 
-		}*/
+		}
+
+		if ( OldWaypoint == CurrentWaypoint && CurrentWaypointID == ( IsBackwards ? 0 : CurrentLane.Waypoints.Length - 1 ) )
+		{
+
+			Kill();
+
+		}
 		
 		switch ( State )
 		{
@@ -247,6 +269,7 @@ public partial class BaseUnit : AnimEntity
 					}
 
 					State = UnitState.Idle;
+					OldWaypoint = CurrentWaypoint;
 
 					break;
 				}
@@ -310,7 +333,7 @@ public partial class BaseUnit : AnimEntity
 
 			CurrentSequence.Name = UnitAnimations[ State ];
 
-			CurrentSequence.Time = ( CurrentSequence.Time + frameTime ) % CurrentSequence.Duration;
+			CurrentSequence.Time = ( CurrentSequence.Time + frameTime / Kingdom.TurnDuration ) % CurrentSequence.Duration;
 			lastDistance = Math.Max( CurrentView.Position.Distance( Position ) - StartingDistance, 1f );
 			nextFrame = MathX.LerpTo( AnimationFrames, MinimumFrames, lastDistance / EndingDistance );
 
@@ -336,6 +359,23 @@ public partial class BaseUnit : AnimEntity
 			frameTime = 0f;
 
 		}
+
+	}
+
+	public void Kill( bool silent = false )
+	{
+
+		CurrentWaypoint.Status = WaypointStatus.Free;
+		OldWaypoint.Status = WaypointStatus.Free;
+
+		if ( !silent )
+		{
+
+			Particles.Create( "particles/dead_citizen.vpcf", this.Position );
+
+		}
+
+		Delete();
 
 	}
 

@@ -50,10 +50,11 @@ public class Lane : BaseNetworkable
 		OriginPath = originPath;
 		Waypoints = new Waypoint[totalWaypoints + 1];
 
-		Waypoints[0] = new Waypoint( from, this ); // First waypoints are inside the fort and then spread out
-
 		Vector3 direction = ( to - from ).Normal;
+		float entranceDistance = OriginPath.FortFrom.EntranceDistance;
 		float waypointDistance = totalDistance / ( totalWaypoints );
+
+		Waypoints[0] = new Waypoint( from, this ); // Just for the first waypoint
 		
 		for ( int i = 1; i < totalWaypoints; i++ )
 		{
@@ -64,19 +65,36 @@ public class Lane : BaseNetworkable
 				.WorldOnly()
 				.Run();
 
+			// Entrance waypoint
+			if ( i == 1 )
+			{
+
+				Vector3 entranceDirection = ( ray.EndPosition - from + direction * entranceDistance).Normal;
+				Vector3 entrancePosition = from + entranceDirection * entranceDistance - direction * entranceDistance;
+				Waypoints[0] = new Waypoint( entrancePosition, this );
+
+				//DebugOverlay.Sphere( entrancePosition, 5f, Color.Red, true, float.PositiveInfinity );
+
+			}
+			else if ( i == totalWaypoints - 1 )
+			{
+
+				Vector3 exitDirection = ( ray.EndPosition - to - direction * entranceDistance).Normal;
+				Vector3 exitPosition = to + exitDirection * entranceDistance + direction * entranceDistance;
+				Waypoints[totalWaypoints] = new Waypoint( exitPosition, this );
+
+				//DebugOverlay.Sphere( exitPosition, 5f, Color.Red, true, float.PositiveInfinity );
+
+			}
+
 			Waypoints[i] = new Waypoint( ray.EndPosition, this );
 
-			DebugOverlay.Sphere( ray.EndPosition, 2f, Color.Red, true, float.PositiveInfinity);
+			//DebugOverlay.Sphere( ray.EndPosition, 2f, Color.Red, true, float.PositiveInfinity);
 
 		}
 
-		Waypoints[totalWaypoints] = new Waypoint( to, this ); // Last waypoints are inside the fort
-
 		UnitLaneMap.Add( OriginPath.FortFrom, new BaseUnit[totalWaypoints + 1] );
 		UnitLaneMap.Add( OriginPath.FortTo, new BaseUnit[totalWaypoints + 1] );
-
-		DebugOverlay.Sphere( from, 5f, Color.Red, true, float.PositiveInfinity );
-		DebugOverlay.Sphere( to, 5f, Color.Red, true, float.PositiveInfinity );
 
 	}
 
@@ -139,7 +157,7 @@ public class Path : BaseNetworkable
 
 			BaseUnit laneUnit = null;
 
-			if ( fort == FortFrom )
+			if ( fort == FortTo )
 			{
 
 				laneUnit = lanes.UnitLaneMap[fort].FirstOrDefault( unit => unit != null, null);
@@ -171,6 +189,9 @@ public partial class Kingdom
 {
 
 	public static List<BaseFort> Forts = new List<BaseFort>();
+	public static int LanesCount = 5;
+	public static float LanesWidth = 15f;
+	public static float LanesDensity = 15f;
 
 	[ServerCmd( "generate_paths" )]
 	public static void GeneratePaths( float maxDistance = 500f )
@@ -188,7 +209,7 @@ public partial class Kingdom
 					if ( fortFrom.Position.Distance( fortTo.Position ) <= maxDistance )
 					{
 
-						var path = new Path( fortFrom, fortTo, 5, 15f, 15f );
+						var path = new Path( fortFrom, fortTo, LanesCount, LanesWidth, LanesDensity );
 						path.GenerateLanes();
 
 						fortFrom.AvailablePaths[ fortTo ] = path;

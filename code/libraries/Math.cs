@@ -16,7 +16,7 @@ public partial class Kingdom : Sandbox.Game
 		int[] result = new int[max + 1];
 
 		result[0] = 0; // Always check in front first
-		Log.Info( "0" );
+
 		for ( int i = 1; i <= max * 2; i++ )
 		{
 
@@ -28,21 +28,12 @@ public partial class Kingdom : Sandbox.Game
 			{
 
 				result[curX] = value;
-				Log.Info( value );
 
 			}
 
 		}
 
 		return result;
-
-	}
-
-	[ServerCmd( "spiral" )]
-	public static void TestSpiral()
-	{
-
-		SpiralPattern1D( 0, 4 );
 
 	}
 

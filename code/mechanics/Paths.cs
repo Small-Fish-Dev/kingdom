@@ -189,7 +189,7 @@ public partial class Kingdom
 {
 
 	public static List<BaseFort> Forts = new List<BaseFort>();
-	public static int LanesCount = 3;
+	public static int LanesCount = 30;
 	public static float LanesWidth = 15f;
 	public static float LanesDensity = 15f;
 

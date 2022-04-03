@@ -195,7 +195,7 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
-	[Event("Kingdom_Turn")]
+	[Event("Kingdom_Turn_Units")]
 	public void HandleTurns()
 	{
 
@@ -208,10 +208,12 @@ public partial class BaseUnit : AnimEntity
 			for ( int y = 0; y <= AttackRange; y++ )
 			{
 
+				int[] searchPattern = Kingdom.SpiralPattern1D( CurrentLaneID, OriginalPath.TotalLanes );
+
 				for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
 				{
 
-					Waypoint waypointCheck = FindWaypoint( y, x - (int)( OriginalPath.TotalLanes / 2 ) );
+					Waypoint waypointCheck = FindWaypoint( y, searchPattern[x] );
 					BaseUnit unitFound = waypointCheck.Unit;
 
 					if ( unitFound != null && unitFound != this )
@@ -220,8 +222,9 @@ public partial class BaseUnit : AnimEntity
 						if ( unitFound.IsBackwards != IsBackwards )//( unitFound.Commander != Commander )
 						{
 
-							unitFound.Kill();
+
 							Kill();
+							unitFound.Kill();
 
 							return;
 
@@ -336,7 +339,7 @@ public partial class BaseUnit : AnimEntity
 		if ( IsFirst )
 		{
 
-			DebugOverlay.Sphere( Position, 5f, Color.Green );
+			//DebugOverlay.Sphere( Position, 5f, Color.Green );
 
 		}
 

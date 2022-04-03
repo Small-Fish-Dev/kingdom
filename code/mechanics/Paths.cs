@@ -189,7 +189,7 @@ public partial class Kingdom
 {
 
 	public static List<BaseFort> Forts = new List<BaseFort>();
-	public static int LanesCount = 5;
+	public static int LanesCount = 3;
 	public static float LanesWidth = 15f;
 	public static float LanesDensity = 15f;
 
@@ -238,7 +238,7 @@ public partial class Kingdom
 				foreach ( Lane lane in path.Value.Lanes )
 				{
 
-					for ( int i = 0; i < lane.Waypoints.Count(); i++ )
+					for ( int i = 0; i < lane.Waypoints.Length; i++ )
 					{
 
 						lane.Waypoints[i] = null;

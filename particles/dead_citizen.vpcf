@@ -1151,13 +1151,14 @@
 		},
 		{
 			_class = "C_OP_InterpolateRadius"
-			m_flEndScale = 0.5
+			m_flBias = 1.0
 		},
 		{
 			_class = "C_OP_SpinUpdate"
 		},
 		{
 			_class = "C_OP_FadeOutSimple"
+			m_flFadeOutTime = 1.0
 		},
 	]
 	m_Constraints = 
@@ -1269,6 +1270,7 @@
 				},
 			]
 			m_flAnimationRate = 0.0
+			m_bDisableShadows = true
 		},
 	]
 }

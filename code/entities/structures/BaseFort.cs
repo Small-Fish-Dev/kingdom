@@ -141,7 +141,8 @@ public partial class BaseFort : BaseStructure
 					foreach ( var waypoint in lane.Waypoints )
 					{
 
-						DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}", Kingdom.TurnDuration );
+						DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}: {waypoint.Unit}", Kingdom.TurnDuration );
+						waypoint.Status = WaypointStatus.Free; // Cheeky fix for odd bug, might fix later
 
 					}
 
@@ -159,7 +160,7 @@ public partial class BaseFort : BaseStructure
 							Lane middleLane = path.Value.Lanes[Rand.Int( 0, path.Value.TotalLanes - 1 )];
 
 							bool isBackwards = path.Value.FortFrom == this ? false : true;
-							int targetWaypoint = isBackwards ? middleLane.Waypoints.Count<Waypoint>() - 1 : 0;
+							int targetWaypoint = isBackwards ? middleLane.Waypoints.Length - 1 : 0;
 
 							if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
 							{

@@ -11,7 +11,7 @@ using System.Collections.Generic;
 public partial class Kingdom : Sandbox.Game
 {
 
-	public const float TurnDuration = 0.2f; // How long a turn lasts in seconds
+	public const float TurnDuration = 1f; // How long a turn lasts in seconds
 	public static TimeSince LastTurn = 0;
 
 	[Event.Tick.Server]

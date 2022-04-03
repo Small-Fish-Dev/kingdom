@@ -117,10 +117,10 @@ public partial class BaseUnit : AnimEntity
 	public bool IsValidWaypoint( int waypointID, int laneID )
 	{
 
-		if ( laneID >= 0 && laneID < OriginalPath.Lanes.Count() )
+		if ( laneID >= 0 && laneID < OriginalPath.Lanes.Length )
 		{
 
-			if ( waypointID >= 0 && waypointID < CurrentLane.Waypoints.Count() )
+			if ( waypointID >= 0 && waypointID < CurrentLane.Waypoints.Length )
 			{
 
 				return true;
@@ -171,23 +171,23 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
+		CurrentWaypoint.Unit = null;
 		CurrentWaypoint.Status = WaypointStatus.Free;
-		destination.Status = WaypointStatus.Taken;
-
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
 
 		OldWaypoint = CurrentWaypoint;
 
-		CurrentLane = destination.Lane;
-		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane );
 		CurrentWaypoint = destination;
+		CurrentLane = CurrentWaypoint.Lane;
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint );
-
-		OldWaypoint.Unit = null;
-		CurrentWaypoint.Unit = this;
+		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane );
 
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
+
+		CurrentWaypoint.Unit = this;
+		CurrentWaypoint.Status = WaypointStatus.Taken;
 
 		Rotation = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
 
@@ -200,6 +200,7 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
 		if ( IsFirst )
 		{
@@ -210,7 +211,7 @@ public partial class BaseUnit : AnimEntity
 				for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
 				{
 
-					Waypoint waypointCheck = FindWaypoint( y, x );
+					Waypoint waypointCheck = FindWaypoint( y, x - (int)( OriginalPath.TotalLanes / 2 ) );
 					BaseUnit unitFound = waypointCheck.Unit;
 
 					if ( unitFound != null && unitFound != this )
@@ -323,6 +324,7 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
 		if ( State == UnitState.Walk )
 		{
@@ -385,6 +387,9 @@ public partial class BaseUnit : AnimEntity
 
 	public void Kill( bool silent = false )
 	{
+
+		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
 		CurrentWaypoint.Status = WaypointStatus.Free;

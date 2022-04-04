@@ -30,6 +30,24 @@ public partial class Waypoint : BaseNetworkable
 		Lane = lane;
 
 	}
+	public static bool IsValidWaypoint( BaseUnit unit, int waypointID, int laneID )
+	{
+
+		if ( laneID >= 0 && laneID < unit.OriginalPath.Lanes.Length )
+		{
+
+			if ( waypointID >= 0 && waypointID < unit.CurrentLane.Waypoints.Length )
+			{
+
+				return true;
+
+			}
+
+		}
+
+		return false;
+
+	}
 
 }
 
@@ -189,7 +207,7 @@ public partial class Kingdom
 {
 
 	public static List<BaseFort> Forts = new List<BaseFort>();
-	public static int LanesCount = 30;
+	public static int LanesCount = 5;
 	public static float LanesWidth = 15f;
 	public static float LanesDensity = 15f;
 

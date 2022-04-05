@@ -30,16 +30,8 @@
 						remaps = 
 						[
 							{
-								from = "citizen_eyes.vmat"
-								to = "models/kingdom_citizen/eyes.vmat"
-							},
-							{
-								from = "citizen_skin.vmat"
-								to = "models/kingdom_citizen/citizen.vmat"
-							},
-							{
-								from = "citizen_eyeao.vmat"
-								to = "models/citizen/skin/citizen_eyeao.vmat"
+								from = "kingdom_citizen.vmat"
+								to = "models/kingdom_citizen/kingdom_citizen.vmat"
 							},
 						]
 						use_global_default = false
@@ -53,29 +45,6 @@
 				[
 					{
 						_class = "RenderMeshFile"
-						name = "LOD4"
-						children = 
-						[
-							{
-								_class = "DiscardSkeleton"
-							},
-						]
-						filename = "models/kingdom_citizen/kingdom_citizen_lod4.dmx"
-						import_translation = [ 0.0, 0.0, -80.0 ]
-						import_rotation = [ 0.0, 0.0, 0.0 ]
-						import_scale = 1.0
-						align_origin_x_type = "None"
-						align_origin_y_type = "None"
-						align_origin_z_type = "None"
-						parent_bone = ""
-						import_filter = 
-						{
-							exclude_by_default = false
-							exception_list = [  ]
-						}
-					},
-					{
-						_class = "RenderMeshFile"
 						name = "Body_LOD0"
 						children = 
 						[
@@ -83,7 +52,7 @@
 								_class = "DiscardSkeleton"
 							},
 						]
-						filename = "models/citizen/citizen.fbx"
+						filename = "models/kingdom_citizen/kingdom_citizen.fbx"
 						import_translation = [ 0.0, 0.0, -80.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -96,24 +65,20 @@
 							exclude_by_default = true
 							exception_list = 
 							[
-								"CitizenTorso_LOD0",
-								"CitizenLegs_LOD0",
-								"CitizenHands_LOD0",
-								"CitizenFeet_LOD0",
-								"CitizenHead_LOD0",
+								"renderMeshShape1",
 							]
 						}
 					},
 					{
 						_class = "RenderMeshFile"
-						name = "Body_LOD3"
+						name = "Body_LOD1"
 						children = 
 						[
 							{
 								_class = "DiscardSkeleton"
 							},
 						]
-						filename = "models/citizen/citizen_lod3.fbx"
+						filename = "models/kingdom_citizen/kingdom_citizen_lod1.fbx"
 						import_translation = [ 0.0, 0.0, -80.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -126,10 +91,32 @@
 							exclude_by_default = true
 							exception_list = 
 							[
-								"CitizenTorso_LOD3",
-								"CitizenLegs_LOD3",
-								"CitizenHands_LOD3",
-								"CitizenFeet_LOD3",
+								"renderMeshShape2",
+							]
+						}
+					},
+					{
+						_class = "RenderMeshFile"
+						name = "Body_LOD2"
+						children = 
+						[
+							{
+								_class = "DiscardSkeleton"
+							},
+						]
+						filename = "models/kingdom_citizen/kingdom_citizen_lod2.fbx"
+						import_translation = [ 0.0, 0.0, -80.0 ]
+						import_rotation = [ 0.0, 0.0, 0.0 ]
+						import_scale = 1.0
+						align_origin_x_type = "None"
+						align_origin_y_type = "None"
+						align_origin_z_type = "None"
+						parent_bone = ""
+						import_filter = 
+						{
+							exclude_by_default = true
+							exception_list = 
+							[
 								"CitizenHead_LOD3",
 							]
 						}
@@ -158,7 +145,7 @@
 						switch_threshold = 10.0
 						meshes = 
 						[
-							"Body_LOD3",
+							"Body_LOD1",
 						]
 					},
 					{
@@ -167,7 +154,7 @@
 						switch_threshold = 20.0
 						meshes = 
 						[
-							"LOD4",
+							"Body_LOD2",
 						]
 					},
 				]

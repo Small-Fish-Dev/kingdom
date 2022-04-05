@@ -2,12 +2,12 @@
 
 Layer0
 {
-	shader "vr_simple.vfx"
+	shader "simple.vfx"
 
 	//---- Color ----
 	g_flModelTintAmount "1.000"
 	g_vColorTint "[1.000000 1.000000 1.000000 0.000000]"
-	TextureColor "models/kingdom_citizen/eyes.png"
+	TextureColor "models/kingdom_citizen/kingdom_citizen.png"
 
 	//---- Fade ----
 	g_flFadeExponent "1.000"

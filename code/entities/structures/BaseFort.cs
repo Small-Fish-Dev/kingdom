@@ -13,9 +13,9 @@ public partial class BaseFort : BaseStructure
 	public override float ModelScale => 1f;
 	public override string StructureModel => "models/structures/base_fort.vmdl";
 	public virtual float EntranceDistance => 45f; // The lanes won't begin at the center
-	public virtual float UnitsPerSecond => 1f; // How many units are generated each second inside of this fort
+	public virtual float UnitsPerSecond => 0f; // How many units are generated each second inside of this fort
 	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
-	public virtual int StartingUnits => 1000; // How many units are inside the castle that you need to defeat before capturing
+	public virtual int StartingUnits => 100; // How many units are inside the castle that you need to defeat before capturing
 	public virtual float GoldPerSecond => 1f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
@@ -101,7 +101,7 @@ public partial class BaseFort : BaseStructure
 
 	Dictionary<Path, List<BaseUnit>> firstUnits = new Dictionary<Path, List<BaseUnit>>();
 
-	[Event("Kingdom_Turn")]
+	[Event("Kingdom_Turn_Forts")]
 	public void HandleTurns()
 	{
 
@@ -141,7 +141,8 @@ public partial class BaseFort : BaseStructure
 					foreach ( var waypoint in lane.Waypoints )
 					{
 
-						DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}", Kingdom.TurnDuration );
+						//DebugOverlay.Text( waypoint.Position, $"{waypoint.Status}: {waypoint.Unit}", Kingdom.TurnDuration );
+						waypoint.Status = WaypointStatus.Free; // Cheeky fix for odd bug, might fix later
 
 					}
 
@@ -159,7 +160,7 @@ public partial class BaseFort : BaseStructure
 							Lane middleLane = path.Value.Lanes[Rand.Int( 0, path.Value.TotalLanes - 1 )];
 
 							bool isBackwards = path.Value.FortFrom == this ? false : true;
-							int targetWaypoint = isBackwards ? middleLane.Waypoints.Count<Waypoint>() - 1 : 0;
+							int targetWaypoint = isBackwards ? middleLane.Waypoints.Length - 1 : 0;
 
 							if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
 							{

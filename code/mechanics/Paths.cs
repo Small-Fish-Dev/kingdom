@@ -30,6 +30,24 @@ public partial class Waypoint : BaseNetworkable
 		Lane = lane;
 
 	}
+	public static bool IsValidWaypoint( BaseUnit unit, int waypointID, int laneID )
+	{
+
+		if ( laneID >= 0 && laneID < unit.OriginalPath.Lanes.Length )
+		{
+
+			if ( waypointID >= 0 && waypointID < unit.CurrentLane.Waypoints.Length )
+			{
+
+				return true;
+
+			}
+
+		}
+
+		return false;
+
+	}
 
 }
 
@@ -238,7 +256,7 @@ public partial class Kingdom
 				foreach ( Lane lane in path.Value.Lanes )
 				{
 
-					for ( int i = 0; i < lane.Waypoints.Count(); i++ )
+					for ( int i = 0; i < lane.Waypoints.Length; i++ )
 					{
 
 						lane.Waypoints[i] = null;

@@ -65,6 +65,7 @@ public partial class BaseUnit : AnimEntity
 	public Path OriginalPath { get; set; }
 	public bool IsBackwards { get; set; }
 	public bool IsSetup { get; set; } = false;
+	public Rotation wishAngle { get; set; } = new Rotation();
 
 	public void SetupUnit( BaseFort originalFort, Path originalPath, Lane originalLane )
 	{
@@ -114,42 +115,21 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
-	public bool IsValidWaypoint( int waypointID, int laneID )
-	{
-
-		if ( laneID >= 0 && laneID < OriginalPath.Lanes.Count() )
-		{
-
-			if ( waypointID >= 0 && waypointID < CurrentLane.Waypoints.Count() )
-			{
-
-				return true;
-
-			}
-
-		}
-
-		return false;
-
-	}
-
 	public Waypoint FindWaypoint( int forward, int right )
 	{
-
-		Waypoint targetWaypoint = CurrentWaypoint;
 
 		int moveDirection = IsBackwards ? -1 : 1;
 		int waypointID = CurrentWaypointID + forward * moveDirection;
 		int laneID = CurrentLaneID + right * moveDirection;
 
-		if ( IsValidWaypoint( waypointID, laneID ) )
+		if ( Waypoint.IsValidWaypoint( this, waypointID, laneID ) )
 		{
 
-			targetWaypoint = OriginalPath.Lanes[laneID].Waypoints[waypointID];
+			return OriginalPath.Lanes[laneID].Waypoints[waypointID];
 
 		}
 
-		return targetWaypoint;
+		return CurrentWaypoint;
 
 	}
 
@@ -171,66 +151,198 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
+		CurrentWaypoint.Unit = null;
 		CurrentWaypoint.Status = WaypointStatus.Free;
-		destination.Status = WaypointStatus.Taken;
-
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
 
 		OldWaypoint = CurrentWaypoint;
 
-		CurrentLane = destination.Lane;
-		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane );
 		CurrentWaypoint = destination;
+		CurrentLane = CurrentWaypoint.Lane;
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint );
-
-		OldWaypoint.Unit = null;
-		CurrentWaypoint.Unit = this;
+		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane );
 
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
 
-		Rotation = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
+		CurrentWaypoint.Unit = this;
+		CurrentWaypoint.Status = WaypointStatus.Taken;
+
+		wishAngle = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
 
 		State = UnitState.Walk;
 
 	}
 
-	[Event("Kingdom_Turn")]
-	public void HandleTurns()
+	public Waypoint SearchBestWaypoint()
 	{
 
-		if ( !IsSetup ) { return; }
-
-		if ( IsFirst )
+		for ( int i = 1; i < 4; i++ )
 		{
 
-			for ( int y = 0; y <= AttackRange; y++ )
+			//First try walking forward, then right, then left
+			Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
+
+			if ( targetWaypoint != CurrentWaypoint )
 			{
 
-				for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
+				if ( CanMoveTo( targetWaypoint ) )
 				{
 
-					Waypoint waypointCheck = FindWaypoint( y, x );
-					BaseUnit unitFound = waypointCheck.Unit;
+					return targetWaypoint;
 
-					if ( unitFound != null && unitFound != this )
+				}
+
+			}
+
+		}
+
+		return CurrentWaypoint;
+
+	}
+
+	public Waypoint MoveTowards( Waypoint destination ) // TODO: DEBUG!
+	{
+
+		var destLane = destination.Lane;
+		var destPath = destLane.OriginPath;
+		Vector2 destPosition = new Vector2( Array.IndexOf( destLane.Waypoints, destination ), Array.IndexOf( destPath.Lanes, destLane ) );
+
+		var bestOption = CurrentWaypoint;
+		float bestDistance = float.MaxValue;
+
+		for ( int forward = 0; forward <= 1; forward++ )
+		{
+
+			for ( int right = -1; right <= 1; right++ )
+			{
+
+				Vector2 currentOption = new Vector2( CurrentWaypointID + forward * ( IsBackwards ? -1 : 1 ), CurrentLaneID + right * (IsBackwards ? -1 : 1) );
+				float distance = Vector2.DistanceBetween( destPosition, currentOption );
+
+				var localDestination = FindWaypoint( forward, right );
+
+				if ( CanMoveTo( localDestination ) )
+				{
+
+
+					if ( distance < bestDistance )
 					{
 
-						if ( unitFound.IsBackwards != IsBackwards )//( unitFound.Commander != Commander )
-						{
-
-							unitFound.Kill();
-							Kill();
-
-							return;
-
-						}
+						bestOption = localDestination;
+						bestDistance = distance;
 
 					}
 
 				}
 
 			}
+
+		}
+
+		return bestOption;
+
+	}
+
+	public virtual bool ComputeWalk()
+	{
+
+		if ( Target != null )
+		{
+
+			var destination = MoveTowards( Target.CurrentWaypoint );
+
+			if ( destination != CurrentWaypoint )
+			{
+
+				MoveTo( destination );
+				return true;
+
+			}
+			else
+			{
+
+				State = UnitState.Idle;
+				OldWaypoint = CurrentWaypoint;
+
+			}
+
+		}
+		else
+		{
+
+			Waypoint targetWaypoint = SearchBestWaypoint();
+
+			if ( targetWaypoint != CurrentWaypoint )
+			{
+
+				MoveTo( targetWaypoint );
+				return true;
+
+			}
+			else
+			{
+
+				State = UnitState.Idle;
+				OldWaypoint = CurrentWaypoint;
+
+			}
+
+		}
+
+		
+
+		return false;
+
+	}
+
+	public virtual bool FindEnemy()
+	{
+
+		for ( int y = 0; y <= AttackRange; y++ )
+		{
+
+			int[] searchPattern = Kingdom.SpiralPattern1D( CurrentLaneID, OriginalPath.TotalLanes );
+
+			for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
+			{
+
+				Waypoint waypointCheck = FindWaypoint( y, searchPattern[x] );
+				BaseUnit unitFound = waypointCheck.Unit;
+
+				if ( unitFound != null && unitFound != this )
+				{
+
+					if ( unitFound.IsBackwards != IsBackwards )//( unitFound.Commander != Commander )
+					{
+
+						Target = unitFound;
+						return true;
+
+					}
+
+				}
+
+			}
+
+		}
+
+		return false;
+
+	}
+
+	[Event("Kingdom_Turn_Units")]
+	public virtual void HandleTurns()
+	{
+
+		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
+
+		if ( IsFirst )
+		{
+
+			
 
 		}
 
@@ -247,36 +359,20 @@ public partial class BaseUnit : AnimEntity
 			case UnitState.Walk:
 				{
 
-					for ( int i = 1; i < 4; i++ )
+					if ( Target == null )
 					{
 
-						//First try walking forward, then right, then left
-						Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
-						
-						if ( targetWaypoint != CurrentWaypoint )
-						{
-
-							if ( CanMoveTo( targetWaypoint ) )
-							{
-
-								MoveTo( targetWaypoint );
-								return;
-
-							}
-
-						}
+						FindEnemy();
 
 					}
 
-					State = UnitState.Idle;
-					OldWaypoint = CurrentWaypoint;
-
+					ComputeWalk();
 					break;
+
 				}
 
 			case UnitState.Attack:
 				{
-
 
 
 					break;
@@ -286,27 +382,14 @@ public partial class BaseUnit : AnimEntity
 			case UnitState.Idle:
 				{
 
-					for ( int i = 1; i < 4; i++ )
+					if ( Target == null )
 					{
 
-						//First try walking forward, then right, then left
-						Waypoint targetWaypoint = FindWaypoint( 1, i % 3 - 1 );
-
-						if ( targetWaypoint != CurrentWaypoint )
-						{
-
-							if ( CanMoveTo( targetWaypoint ) )
-							{
-
-								MoveTo( targetWaypoint );
-								return;
-
-							}
-
-						}
+						FindEnemy();
 
 					}
 
+					ComputeWalk();
 					break;
 
 				}
@@ -323,6 +406,7 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
 		if ( State == UnitState.Walk )
 		{
@@ -334,9 +418,11 @@ public partial class BaseUnit : AnimEntity
 		if ( IsFirst )
 		{
 
-			DebugOverlay.Sphere( Position, 5f, Color.Green );
+			//DebugOverlay.Sphere( Position, 5f, Color.Green );
 
 		}
+
+		Rotation = Rotation.Lerp( Rotation, wishAngle, Time.Delta * 5f / Kingdom.TurnDuration );
 
 	}
 
@@ -385,6 +471,9 @@ public partial class BaseUnit : AnimEntity
 
 	public void Kill( bool silent = false )
 	{
+
+		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
 
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
 		CurrentWaypoint.Status = WaypointStatus.Free;

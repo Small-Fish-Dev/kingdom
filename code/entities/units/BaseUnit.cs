@@ -67,6 +67,36 @@ public partial class BaseUnit : AnimEntity
 	public bool IsSetup { get; set; } = false;
 	public Rotation wishAngle { get; set; } = new Rotation();
 
+	public void SetClothing( string modelPath ) //TODO: Make only on client
+	{
+
+		if ( modelPath != "none" )
+		{
+
+			var entity = new ModelEntity();
+
+			entity.SetModel( modelPath );
+			entity.SetParent( this, true );
+			entity.EnableShadowCasting = false;
+
+		}
+
+	}
+	/*public void BasicClothes()
+	{
+
+		SetClothing( "hat", "models/clothing/hats/ushanka.vmdl" );
+		SetClothing( "jacket", "models/clothing/jackets/jumper.vmdl" );
+		SetClothing( "trousers", "models/clothing/trousers/fishing_trousers.vmdl" );
+		SetClothing( "gloves", "models/citizen_clothes/gloves/gloves_workgloves.vmdl" );
+		SetClothing( "boots", "models/clothing/shoes/winter_boots.vmdl" );
+
+		SetBodyGroup( 4, 1 ); // Remove Feet
+		SetBodyGroup( 3, 1 ); // Remove Hands
+		SetBodyGroup( 2, 1 ); // Remove Legs
+
+	}*/
+
 	public void SetupUnit( BaseFort originalFort, Path originalPath, Lane originalLane )
 	{
 
@@ -85,6 +115,8 @@ public partial class BaseUnit : AnimEntity
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
 
 		IsSetup = true;
+
+		SetClothing( "models/outfits/peasant_outfit.vmdl" ); //TODO: Beautify
 
 		Position = CurrentWaypoint.Position;
 		Rotation = Rotation.LookAt( IsBackwards ? CurrentLane.OriginPath.FortFrom.Position - CurrentLane.OriginPath.FortTo.Position : CurrentLane.OriginPath.FortTo.Position - CurrentLane.OriginPath.FortFrom.Position );
@@ -210,7 +242,7 @@ public partial class BaseUnit : AnimEntity
 		Vector2 destPosition = new Vector2( Array.IndexOf( destLane.Waypoints, destination ), Array.IndexOf( destPath.Lanes, destLane ) );
 
 		var bestOption = CurrentWaypoint;
-		float bestDistance = float.MaxValue;
+		float bestDistance = Vector2.DistanceBetween( destPosition, new Vector2( CurrentWaypointID, CurrentLaneID ) );
 
 		for ( int forward = 0; forward <= 1; forward++ )
 		{
@@ -303,7 +335,7 @@ public partial class BaseUnit : AnimEntity
 		for ( int y = 0; y <= AttackRange; y++ )
 		{
 
-			int[] searchPattern = Kingdom.SpiralPattern1D( CurrentLaneID, OriginalPath.TotalLanes );
+			int[] searchPattern = Kingdom.SpiralPattern1D( CurrentLaneID, OriginalPath.TotalLanes, IsBackwards );
 
 			for ( int x = 0; x < OriginalPath.TotalLanes; x++ )
 			{

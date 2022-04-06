@@ -162,7 +162,7 @@ public partial class BaseFort : BaseStructure
 				foreach ( var unit in StoredUnits )
 				{
 
-					for( int i = 0; i < 3; i++ )
+					for( int i = 0; i < 1; i++ )
 					{
 
 						if ( unit.Value > 0 )

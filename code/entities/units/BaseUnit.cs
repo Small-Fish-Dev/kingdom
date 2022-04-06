@@ -18,7 +18,7 @@ public partial class BaseUnit : AnimEntity
 
 	public virtual string UnitName => "Base";
 	public virtual string UnitAlignment => "Base";
-	public virtual int HitPoints => 1;
+	public virtual int MaxHP => 1;
 	public virtual float ModelScale => 0.3f;
 	public virtual int UnitWidth => 1; // How many lanes are taken up
 	public virtual int AttackStrength => 1; // How many hitpoints they deal
@@ -52,6 +52,24 @@ public partial class BaseUnit : AnimEntity
 	public virtual float AttackKeyframe => 0.2f; // At which point of the attack animation damage is dealt ( Seconds )
 
 
+	int hp { get; set; }
+	public int HitPoints {
+		get 
+		{
+			return hp;
+		}
+		set
+		{
+			hp = value;
+			if ( hp <= 0 )
+			{
+
+				Kill();
+
+			}
+
+		}
+	}
 	[Net] public UnitState State { get; set; } = UnitState.Idle;
 	public Waypoint OldWaypoint { get; set; }
 	[Net] public int CurrentWaypointID { get; set; } = 0;
@@ -100,6 +118,7 @@ public partial class BaseUnit : AnimEntity
 	public void SetupUnit( BaseFort originalFort, Path originalPath, Lane originalLane )
 	{
 
+		hp = MaxHP;
 		OriginalFort = originalFort;
 		Commander = OriginalFort.Holder;
 		OriginalPath = originalPath;
@@ -449,7 +468,7 @@ public partial class BaseUnit : AnimEntity
 
 					}
 
-					Target.Kill();
+					Target.HitPoints--;
 
 					break;
 

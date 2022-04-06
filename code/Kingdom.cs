@@ -10,8 +10,9 @@ public partial class Kingdom : Sandbox.Game
 {
 	public Kingdom()
 	{
-
+		//TODO: Make a list of something to precache stuff
 		Precache.Add( "models/kingdom_citizen/kingdom_citizen.vmdl" );
+		Precache.Add( "models/outfits/peasant_outfit.vmdl" );
 
 	}
 

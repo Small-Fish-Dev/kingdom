@@ -15,7 +15,7 @@ public partial class BaseFort : BaseStructure
 	public virtual float EntranceDistance => 45f; // The lanes won't begin at the center
 	public virtual float UnitsPerSecond => 0f; // How many units are generated each second inside of this fort
 	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
-	public virtual int StartingUnits => 15; // How many units are inside the castle that you need to defeat before capturing
+	public virtual int StartingUnits => 2500; // How many units are inside the castle that you need to defeat before capturing
 	public virtual float GoldPerSecond => 1f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
@@ -162,7 +162,7 @@ public partial class BaseFort : BaseStructure
 				foreach ( var unit in StoredUnits )
 				{
 
-					for( int i = 0; i < 1; i++ )
+					for( int i = 0; i < 3; i++ )
 					{
 
 						if ( unit.Value > 0 )
@@ -182,6 +182,12 @@ public partial class BaseFort : BaseStructure
 
 							}
 
+
+						}
+						else
+						{
+
+							break;
 
 						}
 

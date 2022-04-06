@@ -30,7 +30,7 @@
 					{
 						_class = "RenderMeshFile"
 						name = "LOD0"
-						filename = "models/outfits/peasant_outfit.dmx"
+						filename = "models/outfits/peasant_outfit.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -47,6 +47,21 @@
 					{
 						_class = "RenderMeshFile"
 						name = "LOD1"
+						children = 
+						[
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"leg_lower_l_twist",
+									"leg_lower_r_twist",
+									"leg_knee_helper_l",
+									"leg_knee_helper_r",
+									"arm_upper_l",
+									"arm_upper_r",
+								]
+							},
+						]
 						filename = "models/outfits/peasant_outfit_lod1.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]

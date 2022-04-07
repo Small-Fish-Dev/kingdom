@@ -92,7 +92,7 @@
 					},
 					{
 						_class = "LODGroup"
-						switch_threshold = 15.0
+						switch_threshold = 30.0
 						meshes = 
 						[
 							"LOD1",

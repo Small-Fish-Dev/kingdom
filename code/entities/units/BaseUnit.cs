@@ -18,7 +18,7 @@ public partial class BaseUnit : AnimEntity
 
 	public virtual string UnitName => "Base";
 	public virtual string UnitAlignment => "Base";
-	public virtual int HitPoints => 1;
+	public virtual int MaxHP => 1;
 	public virtual float ModelScale => 0.3f;
 	public virtual int UnitWidth => 1; // How many lanes are taken up
 	public virtual int AttackStrength => 1; // How many hitpoints they deal
@@ -52,7 +52,25 @@ public partial class BaseUnit : AnimEntity
 	public virtual float AttackKeyframe => 0.2f; // At which point of the attack animation damage is dealt ( Seconds )
 
 
-	[Net] public UnitState State { get; set; } = UnitState.Walk;
+	int hp { get; set; }
+	public int HitPoints {
+		get 
+		{
+			return hp;
+		}
+		set
+		{
+			hp = value;
+			if ( hp <= 0 )
+			{
+
+				Kill();
+
+			}
+
+		}
+	}
+	[Net] public UnitState State { get; set; } = UnitState.Idle;
 	public Waypoint OldWaypoint { get; set; }
 	[Net] public int CurrentWaypointID { get; set; } = 0;
 	public Lane CurrentLane { get; set; }
@@ -100,6 +118,7 @@ public partial class BaseUnit : AnimEntity
 	public void SetupUnit( BaseFort originalFort, Path originalPath, Lane originalLane )
 	{
 
+		hp = MaxHP;
 		OriginalFort = originalFort;
 		Commander = OriginalFort.Holder;
 		OriginalPath = originalPath;
@@ -329,7 +348,7 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
-	public virtual bool FindEnemy()
+	public virtual bool FindEnemy() // TODO: ONCE IN RANGE, FACE TOWARDS ENEMY AND BEGIN ATTACK STATE
 	{
 
 		for ( int y = 0; y <= AttackRange; y++ )
@@ -355,6 +374,28 @@ public partial class BaseUnit : AnimEntity
 					}
 
 				}
+
+			}
+
+		}
+
+		return false;
+
+	}
+
+	public bool IsInRange( BaseUnit target )
+	{
+
+		int waypointPos = target.CurrentWaypointID;
+		int lanePos = target.CurrentLaneID;
+
+		if ( waypointPos <= CurrentWaypointID + AttackRange && waypointPos >= CurrentWaypointID - AttackRange )
+		{
+
+			if ( lanePos <= CurrentLaneID + AttackRange && lanePos >= CurrentLaneID - AttackRange )
+			{
+
+				return true;
 
 			}
 
@@ -397,6 +438,19 @@ public partial class BaseUnit : AnimEntity
 						FindEnemy();
 
 					}
+					else
+					{
+
+						if ( IsInRange( Target ) )
+						{
+
+							wishAngle = Rotation.LookAt( Target.Position - Position, Vector3.Up );
+							State = UnitState.Attack;
+							break;
+
+						}
+
+					}
 
 					ComputeWalk();
 					break;
@@ -406,6 +460,15 @@ public partial class BaseUnit : AnimEntity
 			case UnitState.Attack:
 				{
 
+					if ( Target == null )
+					{
+
+						State = UnitState.Walk;
+						break;
+
+					}
+
+					Target.HitPoints--;
 
 					break;
 
@@ -418,6 +481,19 @@ public partial class BaseUnit : AnimEntity
 					{
 
 						FindEnemy();
+
+					}
+					else
+					{
+
+						if ( IsInRange( Target ) )
+						{
+
+							wishAngle = Rotation.LookAt( Target.Position - Position, Vector3.Up );
+							State = UnitState.Attack;
+							break;
+
+						}
 
 					}
 

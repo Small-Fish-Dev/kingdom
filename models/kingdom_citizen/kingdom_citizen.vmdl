@@ -53,6 +53,7 @@
 									"face_lid_lower_R",
 									"face_lid_upper_L",
 									"face_lid_upper_R",
+									"head",
 								]
 							},
 						]
@@ -88,6 +89,7 @@
 									"face_lid_lower_R",
 									"face_lid_upper_L",
 									"face_lid_upper_R",
+									"head",
 								]
 							},
 							{
@@ -145,6 +147,7 @@
 									"face_lid_lower_R",
 									"face_lid_upper_L",
 									"face_lid_upper_R",
+									"head",
 								]
 							},
 							{

@@ -6,117 +6,6 @@
 		children = 
 		[
 			{
-				_class = "MaterialGroupList"
-				children = 
-				[
-					{
-						_class = "DefaultMaterialGroup"
-						remaps = 
-						[
-							{
-								from = "peasant.vmat"
-								to = "models/outfits/outfit_peasant.vmat"
-							},
-						]
-						use_global_default = false
-						global_default_material = ""
-					},
-				]
-			},
-			{
-				_class = "RenderMeshList"
-				children = 
-				[
-					{
-						_class = "RenderMeshFile"
-						name = "LOD0"
-						filename = "models/outfits/outfit_peasant.fbx"
-						import_translation = [ 0.0, 0.0, 0.0 ]
-						import_rotation = [ 0.0, 0.0, 0.0 ]
-						import_scale = 1.0
-						align_origin_x_type = "None"
-						align_origin_y_type = "None"
-						align_origin_z_type = "None"
-						parent_bone = ""
-						import_filter = 
-						{
-							exclude_by_default = false
-							exception_list = [  ]
-						}
-					},
-					{
-						_class = "RenderMeshFile"
-						name = "LOD1"
-						children = 
-						[
-							{
-								_class = "RemoveBoneAndChildren"
-								bone_names = 
-								[
-									"leg_lower_L_twist",
-									"leg_lower_R_twist",
-									"leg_upper_L_twist",
-									"leg_upper_R_twist",
-									"arm_elbow_helper_L",
-									"arm_elbow_helper_R",
-									"leg_knee_helper_L",
-									"leg_knee_helper_R",
-								]
-							},
-						]
-						filename = "models/outfits/outfit_peasant_lod1.fbx"
-						import_translation = [ 0.0, 0.0, 0.0 ]
-						import_rotation = [ 0.0, 0.0, 0.0 ]
-						import_scale = 1.0
-						align_origin_x_type = "None"
-						align_origin_y_type = "None"
-						align_origin_z_type = "None"
-						parent_bone = ""
-						import_filter = 
-						{
-							exclude_by_default = false
-							exception_list = [  ]
-						}
-					},
-					{
-						_class = "RenderMeshFile"
-						name = "LOD2"
-						children = 
-						[
-							{
-								_class = "RemoveBoneAndChildren"
-								bone_names = 
-								[
-									"leg_lower_L_twist",
-									"leg_lower_R_twist",
-									"leg_upper_L_twist",
-									"leg_upper_R_twist",
-									"arm_elbow_helper_L",
-									"arm_elbow_helper_R",
-									"leg_knee_helper_L",
-									"leg_knee_helper_R",
-									"arm_upper_l",
-									"arm_upper_r",
-								]
-							},
-						]
-						filename = "models/outfits/outfit_peasant_lod2.fbx"
-						import_translation = [ 0.0, 0.0, 0.0 ]
-						import_rotation = [ 0.0, 0.0, 0.0 ]
-						import_scale = 1.0
-						align_origin_x_type = "None"
-						align_origin_y_type = "None"
-						align_origin_z_type = "None"
-						parent_bone = ""
-						import_filter = 
-						{
-							exclude_by_default = false
-							exception_list = [  ]
-						}
-					},
-				]
-			},
-			{
 				_class = "LODGroupList"
 				children = 
 				[
@@ -143,6 +32,134 @@
 						[
 							"LOD2",
 						]
+					},
+				]
+			},
+			{
+				_class = "MaterialGroupList"
+				children = 
+				[
+					{
+						_class = "DefaultMaterialGroup"
+						remaps = 
+						[
+							{
+								from = "outfit_thief.vmat"
+								to = "models/outfits/outfit_thief.vmat"
+							},
+						]
+						use_global_default = false
+						global_default_material = ""
+					},
+				]
+			},
+			{
+				_class = "RenderMeshList"
+				children = 
+				[
+					{
+						_class = "RenderMeshFile"
+						name = "LOD0"
+						filename = "models/outfits/outfit_thief.fbx"
+						import_translation = [ 0.0, 0.0, 0.0 ]
+						import_rotation = [ 0.0, 0.0, 0.0 ]
+						import_scale = 1.0
+						align_origin_x_type = "None"
+						align_origin_y_type = "None"
+						align_origin_z_type = "None"
+						parent_bone = ""
+						import_filter = 
+						{
+							exclude_by_default = false
+							exception_list = [  ]
+						}
+					},
+					{
+						_class = "RenderMeshFile"
+						name = "LOD1"
+						children = 
+						[
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"hand_L",
+									"hand_R",
+									"ankle_L",
+									"ankle_R",
+									"arm_lower_L_twist",
+									"arm_lower_R_twist",
+									"arm_upper_L_twist",
+									"arm_upper_R_twist",
+									"leg_lower_L_twist",
+									"leg_lower_R_twist",
+									"leg_upper_L_twist",
+									"leg_upper_R_twist",
+									"arm_elbow_helper_L",
+									"arm_elbow_helper_R",
+									"leg_knee_helper_L",
+									"leg_knee_helper_R",
+								]
+							},
+						]
+						filename = "models/outfits/outfit_thief_lod1.fbx"
+						import_translation = [ 0.0, 0.0, 0.0 ]
+						import_rotation = [ 0.0, 0.0, 0.0 ]
+						import_scale = 1.0
+						align_origin_x_type = "None"
+						align_origin_y_type = "None"
+						align_origin_z_type = "None"
+						parent_bone = ""
+						import_filter = 
+						{
+							exclude_by_default = false
+							exception_list = [  ]
+						}
+					},
+					{
+						_class = "RenderMeshFile"
+						name = "LOD2"
+						children = 
+						[
+							{
+								_class = "RemoveBoneAndChildren"
+								bone_names = 
+								[
+									"hand_L",
+									"hand_R",
+									"ankle_L",
+									"ankle_R",
+									"arm_lower_L_twist",
+									"arm_lower_R_twist",
+									"arm_upper_L_twist",
+									"arm_upper_R_twist",
+									"leg_lower_L_twist",
+									"leg_lower_R_twist",
+									"leg_upper_L_twist",
+									"leg_upper_R_twist",
+									"arm_elbow_helper_L",
+									"arm_elbow_helper_R",
+									"leg_knee_helper_L",
+									"leg_knee_helper_R",
+									"arm_lower_l",
+									"arm_lower_r",
+									"head",
+								]
+							},
+						]
+						filename = "models/outfits/outfit_thief_lod2.fbx"
+						import_translation = [ 0.0, 0.0, 0.0 ]
+						import_rotation = [ 0.0, 0.0, 0.0 ]
+						import_scale = 1.0
+						align_origin_x_type = "None"
+						align_origin_y_type = "None"
+						align_origin_z_type = "None"
+						parent_bone = ""
+						import_filter = 
+						{
+							exclude_by_default = false
+							exception_list = [  ]
+						}
 					},
 				]
 			},

@@ -19,7 +19,7 @@
 					},
 					{
 						_class = "LODGroup"
-						switch_threshold = 15.0
+						switch_threshold = 30.0
 						meshes = 
 						[
 							"LOD1",
@@ -41,13 +41,7 @@
 				[
 					{
 						_class = "DefaultMaterialGroup"
-						remaps = 
-						[
-							{
-								from = "outfit_knight.vmat"
-								to = "models/outfits/outfit_knight.vmat"
-							},
-						]
+						remaps = [  ]
 						use_global_default = false
 						global_default_material = ""
 					},

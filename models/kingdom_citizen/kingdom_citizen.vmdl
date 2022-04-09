@@ -18,8 +18,19 @@
 								to = "models/kingdom_citizen/kingdom_citizen.vmat"
 							},
 						]
-						use_global_default = false
-						global_default_material = ""
+						use_global_default = true
+						global_default_material = "models/kingdom_citizen/kingdom_citizen.vmat"
+					},
+					{
+						_class = "MaterialGroup"
+						name = "thief"
+						remaps = 
+						[
+							{
+								from = "models/kingdom_citizen/kingdom_citizen.vmat"
+								to = "models/kingdom_citizen/kingdom_thief.vmat"
+							},
+						]
 					},
 				]
 			},

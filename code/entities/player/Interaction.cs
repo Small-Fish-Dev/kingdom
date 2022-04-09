@@ -54,7 +54,7 @@ public partial class King : Player
 
 			}*/
 
-			var fort = new BruteFort();
+			var fort = new OgreFort();
 			fort.Position = tr.EndPosition;
 			Kingdom.Forts.Add( fort );
 

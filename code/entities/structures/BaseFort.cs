@@ -15,7 +15,7 @@ public partial class BaseFort : BaseStructure
 	public virtual float EntranceDistance => 45f; // The lanes won't begin at the center
 	public virtual float UnitsPerTurn => 0.5f; // How many units are generated each second inside of this fort
 	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
-	public virtual int StartingUnits => 40; // How many units are inside the castle that you need to defeat before capturing
+	public virtual int StartingUnits => 400; // How many units are inside the castle that you need to defeat before capturing
 	public virtual float GoldPerTurn => 1f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
@@ -171,9 +171,10 @@ public partial class BaseFort : BaseStructure
 							Lane middleLane = path.Value.Lanes[Rand.Int( 0, path.Value.TotalLanes - 1 )];
 
 							bool isBackwards = path.Value.FortFrom == this ? false : true;
-							int targetWaypoint = isBackwards ? middleLane.Waypoints.Length - 1 : 0;
+							int spawnWaypoint = isBackwards ? middleLane.Waypoints.Length - 1 : 0;
+							int targetWaypoint = isBackwards ? middleLane.Waypoints.Length - 2 : 1;
 
-							if ( middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
+							if ( middleLane.Waypoints[spawnWaypoint].Status != WaypointStatus.Taken && middleLane.Waypoints[targetWaypoint].Status != WaypointStatus.Taken )
 							{
 
 								CreateUnit( unit.Key, path.Value, middleLane );

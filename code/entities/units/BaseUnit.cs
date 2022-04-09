@@ -16,6 +16,7 @@ public enum UnitState
 public partial class BaseUnit : AnimEntity
 {
 
+	public virtual string LibraryName => "Unit.Base"; // TODO: Find a way to get it from the type
 	public virtual string UnitName => "Base";
 	public virtual string UnitAlignment => "Base";
 	public virtual int MaxHP => 1;
@@ -71,7 +72,7 @@ public partial class BaseUnit : AnimEntity
 
 		}
 	}
-	[Net] public UnitState State { get; set; } = UnitState.Idle;
+	[Net] public UnitState State { get; set; } = UnitState.Walk;
 	public Waypoint OldWaypoint { get; set; }
 	[Net] public int CurrentWaypointID { get; set; } = 0;
 	public Lane CurrentLane { get; set; }
@@ -126,8 +127,8 @@ public partial class BaseUnit : AnimEntity
 		CurrentLane = originalLane;
 		CurrentLaneID = Array.IndexOf( OriginalPath.Lanes, CurrentLane);
 		IsBackwards = CurrentLane.OriginPath.FortTo == OriginalFort;
-		CurrentWaypoint = IsBackwards ? CurrentLane.Waypoints.Last<Waypoint>() : CurrentLane.Waypoints[0];
-		OldWaypoint = CurrentWaypoint;
+		CurrentWaypoint = IsBackwards ? CurrentLane.Waypoints[CurrentLane.Waypoints.Length - 2] : CurrentLane.Waypoints[1];
+		OldWaypoint = IsBackwards ? CurrentLane.Waypoints[CurrentLane.Waypoints.Length - 1] : CurrentLane.Waypoints[0];
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint);
 		OldWaypoint.Status = WaypointStatus.Taken;
 		CurrentWaypoint.Status = WaypointStatus.Taken;
@@ -139,7 +140,7 @@ public partial class BaseUnit : AnimEntity
 		SetClothing( Outfit ); //TODO: Beautify
 
 		Position = CurrentWaypoint.Position;
-		Rotation = Rotation.LookAt( IsBackwards ? CurrentLane.OriginPath.FortFrom.Position - CurrentLane.OriginPath.FortTo.Position : CurrentLane.OriginPath.FortTo.Position - CurrentLane.OriginPath.FortFrom.Position );
+		wishAngle = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
 
 	}
 
@@ -407,6 +408,45 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
+	public bool IsNearToFort()
+	{
+
+		if ( CurrentWaypointID == (IsBackwards ? 0 : CurrentLane.Waypoints.Length - 1) )
+		{
+
+			return true;
+
+		}
+
+		return false;
+
+	}
+
+	public virtual void ComputeInvasion()
+	{
+
+		if ( IsNearToFort() )
+		{
+
+			Kill( true );
+
+			if ( IsBackwards )
+			{
+
+				//OriginalPath.FortFrom.AddUnits( LibraryName, 1 );
+
+			}
+			else
+			{
+
+				//OriginalPath.FortTo.AddUnits( LibraryName, 1 );
+
+			}
+
+		}
+
+	}
+
 	[Event("Kingdom_Turn_Units")]
 	public virtual void HandleTurns()
 	{
@@ -421,12 +461,7 @@ public partial class BaseUnit : AnimEntity
 
 		}
 
-		if ( CurrentWaypointID == ( IsBackwards ? 0 : CurrentLane.Waypoints.Length - 1 ) )
-		{
-
-			Kill();
-
-		}
+		ComputeInvasion();
 		
 		switch ( State )
 		{
@@ -514,7 +549,7 @@ public partial class BaseUnit : AnimEntity
 	}
 
 	Vector3 randomOffset = new Vector3( Rand.Float( -4f, 4f ), Rand.Float( -4f, 4f ), 0 );
-	[Event.Tick]
+	[Event.Tick.Server]
 	public void HandleMovement()
 	{
 

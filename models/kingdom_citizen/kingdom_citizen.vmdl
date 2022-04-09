@@ -638,7 +638,7 @@
 					{
 						_class = "LODGroup"
 						note = "TODO: experiment with culling bones here right in the sources. Unlike in S1 it seems like we don\'t have LOD commands specifically related to culling bones"
-						switch_threshold = 45.0
+						switch_threshold = 60.0
 						meshes = 
 						[
 							"Body_LOD3",

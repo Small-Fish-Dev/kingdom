@@ -15,7 +15,7 @@
 						[
 							{
 								from = "peasant.vmat"
-								to = "models/outfits/peasant_outfit.vmat"
+								to = "models/outfits/outfit_peasant.vmat"
 							},
 						]
 						use_global_default = false
@@ -30,7 +30,7 @@
 					{
 						_class = "RenderMeshFile"
 						name = "LOD0"
-						filename = "models/outfits/peasant_outfit.fbx"
+						filename = "models/outfits/outfit_peasant.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -53,16 +53,18 @@
 								_class = "RemoveBoneAndChildren"
 								bone_names = 
 								[
-									"leg_lower_l_twist",
-									"leg_lower_r_twist",
-									"leg_knee_helper_l",
-									"leg_knee_helper_r",
-									"arm_upper_l",
-									"arm_upper_r",
+									"leg_lower_L_twist",
+									"leg_lower_R_twist",
+									"leg_upper_L_twist",
+									"leg_upper_R_twist",
+									"arm_elbow_helper_L",
+									"arm_elbow_helper_R",
+									"leg_knee_helper_L",
+									"leg_knee_helper_R",
 								]
 							},
 						]
-						filename = "models/outfits/peasant_outfit_lod1.fbx"
+						filename = "models/outfits/outfit_peasant_lod1.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -85,18 +87,20 @@
 								_class = "RemoveBoneAndChildren"
 								bone_names = 
 								[
-									"leg_lower_l_twist",
-									"leg_lower_r_twist",
-									"leg_knee_helper_l",
-									"leg_knee_helper_r",
+									"leg_lower_L_twist",
+									"leg_lower_R_twist",
+									"leg_upper_L_twist",
+									"leg_upper_R_twist",
+									"arm_elbow_helper_L",
+									"arm_elbow_helper_R",
+									"leg_knee_helper_L",
+									"leg_knee_helper_R",
 									"arm_upper_l",
 									"arm_upper_r",
-									"leg_upper_l",
-									"leg_upper_r",
 								]
 							},
 						]
-						filename = "models/outfits/peasant_outfit_lod2.fbx"
+						filename = "models/outfits/outfit_peasant_lod2.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -134,7 +138,7 @@
 					},
 					{
 						_class = "LODGroup"
-						switch_threshold = 45.0
+						switch_threshold = 60.0
 						meshes = 
 						[
 							"LOD2",

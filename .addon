@@ -1,5 +1,5 @@
 {
-  "Title": "Build Your Kingdom",
+  "Title": "Kingdom: Tower Offence",
   "Type": "game",
   "Org": "fish",
   "Ident": "kingdom",
@@ -13,6 +13,8 @@
   "Metadata": {
     "MapList": [
       "facepunch.construct"
-    ]
+    ],
+    "MinPlayers": 1,
+    "MaxPlayers": 4
   }
 }

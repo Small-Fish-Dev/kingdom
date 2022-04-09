@@ -44,6 +44,16 @@
 ]
 
 //
+// OgreFort
+//
+@PointClass base(BaseProperties_fish_kingdom) = Structure.Base.OgreFort : ""
+[
+	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
+
+	input SetColor(string) : "Sets the color of this entity. Format is '255 255 255 255'."
+]
+
+//
 // BaseUnit
 //
 @PointClass base(BaseProperties_fish_kingdom) = Unit.Base : ""
@@ -54,9 +64,9 @@
 ]
 
 //
-// Beast
+// Ogre
 //
-@PointClass base(BaseProperties_fish_kingdom) = Unit.Human.Beast : ""
+@PointClass base(BaseProperties_fish_kingdom) = Unit.Human.Ogre : ""
 [
 	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
 

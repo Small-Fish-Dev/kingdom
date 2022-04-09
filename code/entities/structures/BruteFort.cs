@@ -12,6 +12,6 @@ public partial class BruteFort : BaseFort
 	public override string StructureAlignment => "Base";
 	public override string UnitsType => "Unit.Human.Beast";
 	public override int StartingUnits => 1;
-	public override float UnitsPerSecond => 0.2f;
+	public override float UnitsPerTurn => 0.025f;
 
 }

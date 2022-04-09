@@ -13,10 +13,10 @@ public partial class BaseFort : BaseStructure
 	public override float ModelScale => 1f;
 	public override string StructureModel => "models/structures/base_fort.vmdl";
 	public virtual float EntranceDistance => 45f; // The lanes won't begin at the center
-	public virtual float UnitsPerSecond => 15f; // How many units are generated each second inside of this fort
+	public virtual float UnitsPerTurn => 0.5f; // How many units are generated each second inside of this fort
 	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
 	public virtual int StartingUnits => 40; // How many units are inside the castle that you need to defeat before capturing
-	public virtual float GoldPerSecond => 1f; // How much gold it generates each second
+	public virtual float GoldPerTurn => 1f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
 
@@ -66,7 +66,7 @@ public partial class BaseFort : BaseStructure
 		if ( Holder.IsValid() )
 		{
 
-			if ( lastUnitGenerated >= 1 / UnitsPerSecond )
+			if ( lastUnitGenerated >= Kingdom.TurnDuration / UnitsPerTurn )
 			{
 
 				AddUnits( UnitsType, 1 );
@@ -74,7 +74,7 @@ public partial class BaseFort : BaseStructure
 
 			}
 
-			if ( lastGoldGenerated >= 1 / GoldPerSecond )
+			if ( lastGoldGenerated >= Kingdom.TurnDuration / GoldPerTurn )
 			{
 
 				( Holder.Pawn as King ).Gold++;

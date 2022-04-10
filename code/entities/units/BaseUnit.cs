@@ -13,7 +13,7 @@ public enum UnitState
 }
 
 [Library( "Unit.Base" )]
-public partial class BaseUnit : AnimEntity
+public partial class BaseUnit : Entity
 {
 
 	public virtual string LibraryName => "Unit.Base"; // TODO: Find a way to get it from the type
@@ -74,20 +74,22 @@ public partial class BaseUnit : AnimEntity
 	}
 	[Net] public UnitState State { get; set; } = UnitState.Walk;
 	public Waypoint OldWaypoint { get; set; }
-	[Net] public int CurrentWaypointID { get; set; } = 0;
+	public int CurrentWaypointID { get; set; } = 0;
 	public Lane CurrentLane { get; set; }
-	[Net] public int CurrentLaneID { get; set; } = 0;
+	public int CurrentLaneID { get; set; } = 0;
 	public Waypoint CurrentWaypoint { get; set; }
+	[Net] public Vector3 OldPosition { get; set; }
 	public Client Commander { get; set; }
 	[Net] BaseUnit Target { get; set; }
 	public bool IsFirst = false;
 	public BaseFort OriginalFort { get; set; }
 	public Path OriginalPath { get; set; }
 	public bool IsBackwards { get; set; }
-	public bool IsSetup { get; set; } = false;
-	public Rotation wishAngle { get; set; } = new Rotation();
+	[Net] public bool IsSetup { get; set; } = false;
+	[Net] Rotation wishAngle { get; set; } = new Rotation();
+	AnimEntity clientModel { get; set; }
 
-	public void SetClothing( string modelPath ) //TODO: Make only on client
+	public void SetClothing( string modelPath )
 	{
 
 		if ( modelPath != "none" )
@@ -96,26 +98,12 @@ public partial class BaseUnit : AnimEntity
 			var entity = new ModelEntity();
 
 			entity.SetModel( modelPath );
-			entity.SetParent( this, true );
+			entity.SetParent( this.clientModel, true );
 			entity.EnableShadowCasting = false;
 
 		}
 
 	}
-	/*public void BasicClothes()
-	{
-
-		SetClothing( "hat", "models/clothing/hats/ushanka.vmdl" );
-		SetClothing( "jacket", "models/clothing/jackets/jumper.vmdl" );
-		SetClothing( "trousers", "models/clothing/trousers/fishing_trousers.vmdl" );
-		SetClothing( "gloves", "models/citizen_clothes/gloves/gloves_workgloves.vmdl" );
-		SetClothing( "boots", "models/clothing/shoes/winter_boots.vmdl" );
-
-		SetBodyGroup( 4, 1 ); // Remove Feet
-		SetBodyGroup( 3, 1 ); // Remove Hands
-		SetBodyGroup( 2, 1 ); // Remove Legs
-
-	}*/
 
 	public void SetupUnit( BaseFort originalFort, Path originalPath, Lane originalLane )
 	{
@@ -136,9 +124,8 @@ public partial class BaseUnit : AnimEntity
 
 		IsSetup = true;
 
-		SetClothing( Outfit ); //TODO: Beautify
-
 		Position = CurrentWaypoint.Position;
+		Rotation = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
 		wishAngle = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
 
 	}
@@ -148,15 +135,8 @@ public partial class BaseUnit : AnimEntity
 
 		base.Spawn();
 
-		SetModel( UnitModel );
-
+		Transmit = TransmitType.Always;
 		Tags.Add( "Unit", $"{UnitName}", $"{UnitAlignment}" );
-
-		EnableDrawing = true;
-		EnableShadowCasting = false;
-		UseAnimGraph = false;
-		PlaybackRate = 0f;
-		Scale = ModelScale;
 
 	}
 
@@ -164,6 +144,18 @@ public partial class BaseUnit : AnimEntity
 	{
 
 		base.ClientSpawn();
+
+		clientModel = new AnimEntity();
+		clientModel.SetModel( UnitModel );
+		clientModel.Position = Position;
+		clientModel.Rotation = Rotation;
+		clientModel.EnableDrawing = true;
+		clientModel.EnableShadowCasting = false;
+		clientModel.UseAnimGraph = false;
+		clientModel.PlaybackRate = 0f;
+		clientModel.Scale = ModelScale;
+
+		SetClothing( Outfit );
 
 	}
 
@@ -562,14 +554,25 @@ public partial class BaseUnit : AnimEntity
 	}
 
 	Vector3 randomOffset = new Vector3( Rand.Float( -0f, 0f ), Rand.Float( -0f, 0f ), 0 ); //TODO put back -4 4
-	[Event.Tick.Server] //TODO MOVE THIS ALL TO CLIENT WITH CLIENTSIDE MODELENTITY
+	[Event.Tick]
 	public void HandleMovement()
 	{
 
 		if ( !IsSetup ) { return; }
 		if ( !IsValid ) { return; }
+		if ( IsServer )
+		{
 
-		Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
+			OldPosition = OldWaypoint.Position;
+			Position = CurrentWaypoint.Position;
+
+			return;
+
+		}
+		if ( !clientModel.IsValid ) { return; }
+
+
+		clientModel.Position = Vector3.Lerp( OldPosition, Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
 
 		if ( IsFirst )
 		{
@@ -578,7 +581,7 @@ public partial class BaseUnit : AnimEntity
 
 		}
 
-		Rotation = Rotation.Lerp( Rotation, wishAngle, Time.Delta * 5f / Kingdom.TurnDuration );
+		clientModel.Rotation = Rotation.Lerp( clientModel.Rotation, wishAngle, Time.Delta * 5f / Kingdom.TurnDuration );
 
 	}
 
@@ -587,20 +590,26 @@ public partial class BaseUnit : AnimEntity
 	float nextFrame = 0f;
 	bool hasAttacked = false;
 
-	[Event.Tick.Client]
+	[Event.Tick]
 	public void HandleAnimations()
 	{
+
+		if ( !IsSetup ) { return; }
+		if ( !IsValid ) { return; }
+		if ( IsServer ) { return; }
+
+		if ( !clientModel.IsValid ) { return; }
 
 		if ( frameTime >= nextFrame )
 		{
 
-			CurrentSequence.Name = UnitAnimations[ State ];
+			clientModel.CurrentSequence.Name = UnitAnimations[ State ];
 
-			CurrentSequence.Time = ( CurrentSequence.Time + frameTime / Kingdom.TurnDuration ) % CurrentSequence.Duration;
+			clientModel.CurrentSequence.Time = (clientModel.CurrentSequence.Time + frameTime / Kingdom.TurnDuration ) % clientModel.CurrentSequence.Duration;
 			lastDistance = Math.Max( CurrentView.Position.Distance( Position ) - StartingDistance, 1f );
 			nextFrame = MathX.LerpTo( AnimationFrames, MinimumFrames, lastDistance / EndingDistance );
 
-			if ( CurrentSequence.Time >= AttackKeyframe )
+			if ( clientModel.CurrentSequence.Time >= AttackKeyframe )
 			{
 				
 				if ( hasAttacked == false )
@@ -638,19 +647,28 @@ public partial class BaseUnit : AnimEntity
 		if ( !silent )
 		{
 
-			CreateClientParticle( "particles/dead_citizen.vpcf", this.Position );
+			CreateClientParticle( "particles/dead_citizen.vpcf" );
 
 		}
 
+		DeleteClientModel();
 		Delete();
 
 	}
 
 	[ClientRpc]
-	public void CreateClientParticle( string name, Vector3 position )
+	public void DeleteClientModel()
 	{
 
-		Particles.Create( name, position );
+		clientModel.Delete();
+
+	}
+
+	[ClientRpc]
+	public void CreateClientParticle( string name )
+	{
+
+		Particles.Create( name, clientModel.Position );
 
 	}
 

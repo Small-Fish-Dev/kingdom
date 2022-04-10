@@ -78,9 +78,6 @@
 //
 @PointClass base(BaseProperties_fish_kingdom) = Unit.Base : ""
 [
-	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
-
-	input SetColor(string) : "Sets the color of this entity. Format is '255 255 255 255'."
 ]
 
 //
@@ -88,9 +85,6 @@
 //
 @PointClass base(BaseProperties_fish_kingdom) = Unit.Human.Giant : ""
 [
-	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
-
-	input SetColor(string) : "Sets the color of this entity. Format is '255 255 255 255'."
 ]
 
 //
@@ -98,9 +92,6 @@
 //
 @PointClass base(BaseProperties_fish_kingdom) = Unit.Human.Knight : ""
 [
-	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
-
-	input SetColor(string) : "Sets the color of this entity. Format is '255 255 255 255'."
 ]
 
 //
@@ -108,9 +99,6 @@
 //
 @PointClass base(BaseProperties_fish_kingdom) = Unit.Human.Ogre : ""
 [
-	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
-
-	input SetColor(string) : "Sets the color of this entity. Format is '255 255 255 255'."
 ]
 
 //
@@ -118,8 +106,5 @@
 //
 @PointClass base(BaseProperties_fish_kingdom) = Unit.Human.Peasant : ""
 [
-	enable_shadows(boolean) { group = "Rendering" } : "Shadow Casting" : 1 : "Whether this entity should cast shadows or not"
-
-	input SetColor(string) : "Sets the color of this entity. Format is '255 255 255 255'."
 ]
 

@@ -12,18 +12,24 @@ public partial class Kingdom : Sandbox.Game
 {
 
 	public const float TurnDuration = 1f; // How long a turn lasts in seconds
-	public static TimeSince LastTurn = 0;
+	[Net, Predicted] public static TimeSince LastTurn { get; set; } = 0;
 
-	[Event.Tick.Server]
+	[Event.Tick]
 	public void HandleTurns()
 	{
 
 		if ( LastTurn >= TurnDuration )
 		{
 
-			// Units start first
-			Event.Run( "Kingdom_Turn_Units" );
-			Event.Run( "Kingdom_Turn_Forts" );
+			if ( IsServer )
+			{
+
+				// Units start first
+				Event.Run( "Kingdom_Turn_Units" );
+				Event.Run( "Kingdom_Turn_Forts" );
+
+			}
+
 			LastTurn = 0;
 
 		}

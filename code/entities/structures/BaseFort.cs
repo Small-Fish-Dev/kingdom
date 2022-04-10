@@ -13,9 +13,9 @@ public partial class BaseFort : BaseStructure
 	public override float ModelScale => 1f;
 	public override string StructureModel => "models/structures/base_fort.vmdl";
 	public virtual float EntranceDistance => 45f; // The lanes won't begin at the center
-	public virtual float UnitsPerTurn => 0.5f; // How many units are generated each second inside of this fort
+	public virtual float UnitsPerTurn => 0f; // How many units are generated each second inside of this fort
 	public virtual string UnitsType => "Unit.Human.Peasant"; // Which units it generates
-	public virtual int StartingUnits => 400; // How many units are inside the castle that you need to defeat before capturing
+	public virtual int StartingUnits => 100; // How many units are inside the castle that you need to defeat before capturing
 	public virtual float GoldPerTurn => 1f; // How much gold it generates each second
 
 	public override StructureType Type => StructureType.Outpost;
@@ -149,7 +149,7 @@ public partial class BaseFort : BaseStructure
 							if ( waypoint.Unit == null )
 							{
 
-								waypoint.Status = WaypointStatus.Free; // Cheeky fix for odd bug, might fix later
+							//	waypoint.Status = WaypointStatus.Free; // Cheeky fix for odd bug, might fix later
 
 							}
 

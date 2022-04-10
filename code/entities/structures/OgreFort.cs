@@ -13,7 +13,7 @@ public partial class OgreFort : BaseFort
 	public override string UnitsType => "Unit.Human.Ogre";
 	public override float ModelScale => base.ModelScale * 1.5f;
 	public override float EntranceDistance => base.EntranceDistance * 1.5f;
-	public override int StartingUnits => 1;
-	public override float UnitsPerTurn => 0.02f;
+	public override int StartingUnits => 2;
+	public override float UnitsPerTurn => 0.0f;
 
 }

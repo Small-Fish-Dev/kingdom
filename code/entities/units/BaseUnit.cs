@@ -35,7 +35,7 @@ public partial class BaseUnit : AnimEntity
 	 *		[ ][X][X][X][ ]			[X][X][X][X][X]			[X][X][X][X][X]
 	 */
 	public virtual string UnitModel => "models/kingdom_citizen/kingdom_citizen.vmdl";
-	public virtual string Outfit => "models/outfits/peasant_outfit.vmdl";
+	public virtual string Outfit => "";
 
 	public virtual float AnimationFrames => 1f / 30f;        // Full animation frames  ( 1 / { fps } )
 	public virtual float MinimumFrames => 1 / 1f;            // Frames at max distance ( 1 / { fps } )
@@ -130,7 +130,6 @@ public partial class BaseUnit : AnimEntity
 		CurrentWaypoint = IsBackwards ? CurrentLane.Waypoints[CurrentLane.Waypoints.Length - 2] : CurrentLane.Waypoints[1];
 		OldWaypoint = IsBackwards ? CurrentLane.Waypoints[CurrentLane.Waypoints.Length - 1] : CurrentLane.Waypoints[0];
 		CurrentWaypointID = Array.IndexOf( CurrentLane.Waypoints, CurrentWaypoint);
-		OldWaypoint.Status = WaypointStatus.Taken;
 		CurrentWaypoint.Status = WaypointStatus.Taken;
 		CurrentWaypoint.Unit = this;
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
@@ -206,11 +205,15 @@ public partial class BaseUnit : AnimEntity
 		if ( !IsSetup ) { return; }
 		if ( !IsValid ) { return; }
 
+	//	Log.Info( $"[{Time.Now}] {this} MOVING FROM [{CurrentLaneID},{CurrentWaypointID}] ({CurrentWaypoint.Status}-{CurrentWaypoint.Unit})" );
+		//Log.Info( $"[{Time.Now}] {this} TOWARDS [{Array.IndexOf( OriginalPath.Lanes, destination.Lane )},{Array.IndexOf( destination.Lane.Waypoints, destination )}] ({destination.Status}-{destination.Unit})" );
+
 		CurrentWaypoint.Unit = null;
 		CurrentWaypoint.Status = WaypointStatus.Free;
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = null;
 
-		OldWaypoint = CurrentWaypoint;
+		//Log.Info( $"[{Time.Now}] {this} UPDATED [{CurrentLaneID},{CurrentWaypointID}] ({CurrentWaypoint.Status}-{CurrentWaypoint.Unit})" );
+
 
 		CurrentWaypoint = destination;
 		CurrentLane = CurrentWaypoint.Lane;
@@ -219,12 +222,18 @@ public partial class BaseUnit : AnimEntity
 
 		CurrentLane.UnitLaneMap[OriginalFort][CurrentWaypointID] = this;
 
+		//Log.Info( $"[{Time.Now}] {this} CURRENTLY [{CurrentLaneID},{CurrentWaypointID}] IS ({CurrentWaypoint.Status}-{CurrentWaypoint.Unit})" );
+
 		CurrentWaypoint.Unit = this;
 		CurrentWaypoint.Status = WaypointStatus.Taken;
+
+		//Log.Info( $"[{Time.Now}] {this} [{CurrentLaneID},{CurrentWaypointID}] UPDATED TO ({CurrentWaypoint.Status}-{CurrentWaypoint.Unit})" );
 
 		wishAngle = Rotation.LookAt( (CurrentWaypoint.Position - OldWaypoint.Position).Normal, Vector3.Up );
 
 		State = UnitState.Walk;
+
+	//	Log.Info( $"[{Time.Now}] {this} MOVED TO WAYPOINT [{CurrentLaneID},{CurrentWaypointID}] ({CurrentWaypoint.Status}-{CurrentWaypoint.Unit})" );
 
 	}
 
@@ -317,7 +326,6 @@ public partial class BaseUnit : AnimEntity
 			{
 
 				State = UnitState.Idle;
-				OldWaypoint = CurrentWaypoint;
 
 			}
 
@@ -338,7 +346,6 @@ public partial class BaseUnit : AnimEntity
 			{
 
 				State = UnitState.Idle;
-				OldWaypoint = CurrentWaypoint;
 
 			}
 
@@ -433,13 +440,13 @@ public partial class BaseUnit : AnimEntity
 			if ( IsBackwards )
 			{
 
-				//OriginalPath.FortFrom.AddUnits( LibraryName, 1 );
+				OriginalPath.FortFrom.AddUnits( LibraryName, 1 );
 
 			}
 			else
 			{
 
-				//OriginalPath.FortTo.AddUnits( LibraryName, 1 );
+				OriginalPath.FortTo.AddUnits( LibraryName, 1 );
 
 			}
 
@@ -461,6 +468,7 @@ public partial class BaseUnit : AnimEntity
 
 		}
 
+		OldWaypoint = CurrentWaypoint;
 		ComputeInvasion();
 		
 		switch ( State )
@@ -469,13 +477,9 @@ public partial class BaseUnit : AnimEntity
 			case UnitState.Walk:
 				{
 
-					if ( Target == null )
-					{
+					ComputeWalk();
 
-						FindEnemy();
-
-					}
-					else
+					if ( Target != null )
 					{
 
 						if ( IsInRange( Target ) )
@@ -483,14 +487,18 @@ public partial class BaseUnit : AnimEntity
 
 							wishAngle = Rotation.LookAt( Target.Position - Position, Vector3.Up );
 							State = UnitState.Attack;
-							OldWaypoint = CurrentWaypoint;
 							break;
 
 						}
 
 					}
+					else
+					{
 
-					ComputeWalk();
+						FindEnemy();
+
+					}
+
 					break;
 
 				}
@@ -498,17 +506,21 @@ public partial class BaseUnit : AnimEntity
 			case UnitState.Attack:
 				{
 
-					if ( Target == null )
+
+					if ( Target != null && IsInRange( Target ) )
 					{
 
-						State = UnitState.Walk;
-						break;
+						wishAngle = Rotation.LookAt( Target.Position - Position, Vector3.Up );
+						Target.HitPoints -= AttackStrength;
+						FindEnemy(); // In case it killed the last one
 
 					}
+					else
+					{
 
-					wishAngle = Rotation.LookAt( Target.Position - Position, Vector3.Up );
-					Target.HitPoints--;
-					FindEnemy();
+						ComputeWalk();
+
+					}
 
 					break;
 
@@ -517,13 +529,9 @@ public partial class BaseUnit : AnimEntity
 			case UnitState.Idle:
 				{
 
-					if ( Target == null )
-					{
+					ComputeWalk();
 
-						FindEnemy();
-
-					}
-					else
+					if ( Target != null )
 					{
 
 						if ( IsInRange( Target ) )
@@ -536,8 +544,13 @@ public partial class BaseUnit : AnimEntity
 						}
 
 					}
+					else
+					{
 
-					ComputeWalk();
+						FindEnemy();
+
+					}
+
 					break;
 
 				}
@@ -548,20 +561,15 @@ public partial class BaseUnit : AnimEntity
 
 	}
 
-	Vector3 randomOffset = new Vector3( Rand.Float( -4f, 4f ), Rand.Float( -4f, 4f ), 0 );
-	[Event.Tick.Server]
+	Vector3 randomOffset = new Vector3( Rand.Float( -0f, 0f ), Rand.Float( -0f, 0f ), 0 ); //TODO put back -4 4
+	[Event.Tick.Server] //TODO MOVE THIS ALL TO CLIENT WITH CLIENTSIDE MODELENTITY
 	public void HandleMovement()
 	{
 
 		if ( !IsSetup ) { return; }
 		if ( !IsValid ) { return; }
 
-		if ( State == UnitState.Walk )
-		{
-
-			Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
-
-		}
+		Position = Vector3.Lerp( OldWaypoint.Position, CurrentWaypoint.Position, Kingdom.LastTurn / Kingdom.TurnDuration ) + randomOffset;
 
 		if ( IsFirst )
 		{
